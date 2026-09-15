@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disparador IPNET By Vivo</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Design Tokens - Enterprise Workspace Console */
+    :root {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --destructive: #ef4444;
+      --focus-ring: rgba(99, 102, 241, 0.15);
+
+      /* Compatibility aliases for untouched components */
+      --bg-app: var(--canvas);
+      --card-bg: var(--surface);
+      --card-border: var(--border);
+      --input-bg: var(--canvas);
+      --input-border: var(--border);
+      --input-focus-border: #6366f1;
+      --text-main: var(--text-primary);
+      --text-subtle: var(--text-muted);
+      --toolbar-bg: var(--surface);
+      --toolbar-border: var(--border);
+      --btn-secondary-bg: var(--surface);
+      --btn-secondary-border: var(--border-strong);
+      --btn-secondary-hover: var(--surface-subtle);
+      --table-header-bg: var(--canvas);
+      --table-row-hover: var(--canvas);
+      --table-border: var(--border);
+      --shadow-card: none;
+      --shadow-floating: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark {
+      --canvas: #090d16;
+      --surface: #0f172a;
+      --surface-subtle: #0b1120;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --destructive: #ef4444;
+      --focus-ring: rgba(99, 102, 241, 0.25);
+
+      /* Compatibility aliases */
+      --bg-app: var(--canvas);
+      --card-bg: var(--surface);
+      --card-border: var(--border);
+      --input-bg: var(--surface-subtle);
+      --input-border: var(--border);
+      --input-focus-border: #818cf8;
+      --text-main: var(--text-primary);
+      --text-subtle: var(--text-muted);
+      --toolbar-bg: var(--surface);
+      --toolbar-border: var(--border);
+      --btn-secondary-bg: #1e293b;
+      --btn-secondary-border: var(--border-strong);
+      --btn-secondary-hover: #334155;
+      --table-header-bg: var(--surface-subtle);
+      --table-row-hover: rgba(255, 255, 255, 0.02);
+      --table-border: rgba(255, 255, 255, 0.07);
+      --shadow-card: none;
+      --shadow-floating: 0 20px 35px -10px rgba(0, 0, 0, 0.7);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .animate-spin {
+        animation: none !important;
+      }
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color .15s ease, color .15s ease;
+    }
+
+    .app-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    /* Custom Scrollbars */
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 4px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    /* Editor Styling */
+    .editor-container {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+      transition: border-color .12s ease-out, box-shadow .12s ease-out;
+    }
+    .editor-container:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    @media (min-width: 640px) {
+      .editor-toolbar {
+        flex-wrap: wrap;
+        overflow-x: visible;
+      }
+    }
+
+    #selectAlias {
+      max-width: 100%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .tool-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      min-width: 28px;
+      padding: 0 6px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color .12s ease-out, color .12s ease-out;
+    }
+    .tool-btn:hover {
+      background: rgba(99, 102, 241, 0.08);
+      color: var(--text-primary);
+    }
+    .dark .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+    .tool-btn.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .dark .tool-btn.active {
+      background: rgba(99, 102, 241, 0.25);
+      color: #c7d2fe;
+    }
+
+    .tool-divider {
+      display: none;
+    }
+
+    @media (pointer: coarse) {
+      .tool-btn {
+        min-width: 34px;
+        height: 34px;
+      }
+      .var-pill {
+        height: 28px;
+        padding: 0 10px;
+      }
+    }
+
+    .var-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: rgba(99, 102, 241, 0.06);
+      color: #4f46e5;
+      transition: background-color .12s ease-out, border-color .12s ease-out;
+    }
+    .dark .var-pill {
+      background: rgba(99, 102, 241, 0.14);
+      color: #c7d2fe;
+    }
+    .var-pill:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: #6366f1;
+    }
+
+    .rich-editor-content {
+      min-height: 380px;
+      max-height: 540px;
+      overflow-y: auto;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--surface);
+      outline: none;
+    }
+    .rich-editor-content:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-muted);
+      pointer-events: none;
+      display: block;
+      white-space: pre-line;
+    }
+
+    .rich-editor-content p, #previewCorpo p { margin: 0 0 12px; }
+    .rich-editor-content div, #previewCorpo div { margin: 0 0 8px; }
+    .rich-editor-content ul, #previewCorpo ul { list-style: disc inside; margin: 0 0 14px; padding-left: 8px; }
+    .rich-editor-content ol, #previewCorpo ol { list-style: decimal inside; margin: 0 0 14px; padding-left: 8px; }
+    .rich-editor-content li, #previewCorpo li { margin-bottom: 4px; }
+    .rich-editor-content a, #previewCorpo a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+    .rich-editor-content blockquote, #previewCorpo blockquote {
+      border-left: 3px solid var(--primary);
+      padding: 6px 14px;
+      margin: 12px 0;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Variable Tag in Editor */
+    .variable-token {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 7px;
+      margin: 0 2px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: #4f46e5;
+      user-select: all;
+    }
+    .dark .variable-token {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(165, 180, 252, 0.3);
+      color: #c7d2fe;
+    }
+
+    /* Modals Backdrop */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.hidden { display: none !important; }
+
+    /* Inputs & Selects */
+    .form-input {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-main);
+      border-radius: 8px;
+      font-size: 13px;
+      padding: 7px 11px;
+      transition: border-color .15s ease, box-shadow .15s ease;
+      width: 100%;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+    .form-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .table-cell-input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      color: var(--text-main);
+      transition: all .1s ease;
+    }
+    .table-cell-input:hover {
+      border-color: var(--input-border);
+    }
+    .table-cell-input:focus {
+      outline: none;
+      border-color: var(--input-focus-border);
+      background: var(--card-bg);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
+    }
+    .table-cell-input.invalid-email, .form-input.invalid-email {
+      border-color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    /* Smooth Action Button */
+    .btn-primary {
+      background: #4f46e5;
+      color: #ffffff;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      border: 1px solid transparent;
+      transition: background-color .15s ease, transform .1s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary:hover {
+      background: #4338ca;
+    }
+    .btn-primary:active {
+      transform: scale(0.99);
+    }
+
+    .btn-secondary {
+      background: var(--btn-secondary-bg);
+      border: 1px solid var(--btn-secondary-border);
+      color: var(--text-main);
+      font-weight: 500;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      transition: all .15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover {
+      background: var(--btn-secondary-hover);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen py-5 px-3 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto space-y-5">
+
+    <!-- Top Navigation / Application Header -->
+    <header class="app-card px-4 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div class="flex items-center gap-3">
+        <!-- Logo Container -->
+        <div id="logoWrapper" class="h-8 px-2 flex items-center justify-center min-w-[36px] max-w-[200px] rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 overflow-hidden">
+          <!-- Fallback Brand Icon -->
+          <div id="logoFallback" class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13"></path>
+              <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+            </svg>
+            <span class="font-bold text-xs tracking-tight text-slate-800 dark:text-white">IPNET</span>
+          </div>
+          <img id="logoImg" src="" alt="Logo da Empresa" class="hidden h-6 w-auto object-contain" />
+        </div>
+
+        <div class="flex items-baseline gap-2">
+          <h1 class="text-base font-semibold text-slate-900 dark:text-white tracking-tight">
+            Disparador de E-mails
+          </h1>
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+            By Vivo
+          </span>
+        </div>
+      </div>
+
+      <!-- Right Header: Unified Status & Theme Toggle -->
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end min-w-0">
+        <!-- Unified Account & Quota Status Line -->
+        <div id="userBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-md bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 text-xs min-w-0 flex-1 sm:flex-initial overflow-hidden" title="Conta ativa e cota diária">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+          <span id="userEmailText" class="font-mono text-[11px] text-slate-700 dark:text-slate-200 truncate min-w-0" title="Carregando conta...">Carregando conta...</span>
+          <span class="text-slate-300 dark:text-slate-600 select-none shrink-0">·</span>
+          <span id="quotaText" class="font-mono text-[11px] text-slate-600 dark:text-slate-300 whitespace-nowrap shrink-0" title="Cota diária disponível">Cota: ...</span>
+        </div>
+        <!-- Hidden quotaBadge preserved for JS compatibility -->
+        <div id="quotaBadge" class="hidden"></div>
+
+        <!-- Theme Toggle with clean SVG, no emojis -->
+        <button type="button" onclick="alternarTema()" id="btnTema" class="p-2 rounded-md bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors shrink-0" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+          <span id="iconeTema" class="flex items-center justify-center w-4 h-4"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Grid (Left: Message Composition / Right: Recipients & Send) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+      <!-- COLUMN 1: ENVELOPE & COMPOSER (6/12) -->
+      <section class="lg:col-span-6 app-card p-5 space-y-4 min-w-0">
+        <!-- Section Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="flex items-center justify-center w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-white/10">1</span>
+            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Mensagem & Conteúdo</h2>
+          </div>
+        </div>
+
+        <!-- Remetente (De) - Layout Flex Robusto para Aliases Extensos -->
+        <div id="containerAlias" class="hidden items-center gap-2.5 pb-1 min-w-0 max-w-full">
+          <label for="selectAlias" class="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap shrink-0">
+            Remetente (De):
+          </label>
+          <div class="flex-1 min-w-0 max-w-full">
+            <select id="selectAlias" class="form-input !py-1 !text-xs w-full max-w-full truncate"></select>
+          </div>
+        </div>
+
+        <!-- Campo: Assunto com Organização Deliberada Mobile/Desktop -->
+        <div class="space-y-1.5">
+          <div class="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-1">
+            <label for="assunto" class="text-xs font-semibold text-slate-700 dark:text-slate-300 justify-self-start self-center">
+              Assunto
+            </label>
+            <span id="contadorAssunto" class="text-[11px] font-mono text-slate-500 dark:text-slate-400 justify-self-end self-center sm:order-last sm:ml-2 shrink-0">0 / 250</span>
+            <div class="col-span-2 sm:col-auto flex items-center gap-1.5 pt-0.5 sm:pt-0">
+              <span class="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">Tags:</span>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="inserirVariavelNoAssunto('{{Nome}}')" class="var-pill" title="Inserir {{Nome}} no assunto">+ {{Nome}}</button>
+                <button type="button" onclick="inserirVariavelNoAssunto('{{Empresa}}')" class="var-pill" title="Inserir {{Empresa}} no assunto">+ {{Empresa}}</button>
+                <button type="button" id="btnAssuntoGN" onclick="inserirVariavelNoAssunto('{{GN}}')" class="var-pill hidden" title="Inserir {{GN}} no assunto">+ {{GN}}</button>
+              </div>
+            </div>
+          </div>
+          <input type="text" id="assunto" maxlength="250" class="form-input" placeholder="Ex: Informações importantes sobre a parceria com {{Empresa}}" />
+        </div>
+
+        <!-- Campo: Corpo do E-mail com Editor Pro -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Corpo da Mensagem
+            </label>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">Suporta formatação rica e links</span>
+          </div>
+
+          <div class="editor-container">
+            <!-- Toolbar Simplificada: Espaçamento no lugar de Divisores -->
+            <div class="editor-toolbar custom-scrollbar" role="toolbar" aria-label="Ferramentas de Formatação">
+              <!-- Grupo 1: Formatação Básica de Texto -->
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button type="button" id="btnBold" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('bold')" title="Negrito (Ctrl+B)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+                </button>
+                <button type="button" id="btnItalic" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('italic')" title="Itálico (Ctrl+I)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+                </button>
+                <button type="button" id="btnUnderline" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('underline')" title="Sublinhado (Ctrl+U)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+                </button>
+              </div>
+
+              <!-- Espaçador entre grupos -->
+              <div class="w-2.5 shrink-0"></div>
+
+              <!-- Grupo 2: Listas e Links -->
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button type="button" id="btnBullet" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('insertUnorderedList')" title="Lista com marcadores">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </button>
+                <button type="button" id="btnNumbered" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('insertOrderedList')" title="Lista numerada">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+                <button type="button" class="tool-btn" onmousedown="event.preventDefault()" onclick="inserirLinkDialogo()" title="Inserir Link (Ctrl+K)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                </button>
+              </div>
+
+              <!-- Espaçador entre grupos -->
+              <div class="w-2.5 shrink-0"></div>
+
+              <!-- Grupo 3: Histórico e Limpeza -->
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button type="button" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('undo')" title="Desfazer (Ctrl+Z)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                </button>
+                <button type="button" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('redo')" title="Refazer (Ctrl+Y)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+                </button>
+                <button type="button" class="tool-btn" onmousedown="event.preventDefault()" onclick="executarComando('removeFormat')" title="Limpar formatação">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><path d="M4 6h12l-4 8H4z"/></svg>
+                </button>
+              </div>
+
+              <!-- Espaçador entre grupos -->
+              <div class="w-2.5 shrink-0"></div>
+
+              <!-- Grupo 4: Inserir Variáveis no Editor -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" class="var-pill" onmousedown="event.preventDefault()" onclick="inserirVariavelNoEditor('nome')" title="Inserir {{Nome}}">+ {{Nome}}</button>
+                <button type="button" class="var-pill" onmousedown="event.preventDefault()" onclick="inserirVariavelNoEditor('empresa')" title="Inserir {{Empresa}}">+ {{Empresa}}</button>
+                <button type="button" id="btnEditorGN" class="var-pill hidden" onmousedown="event.preventDefault()" onclick="inserirVariavelNoEditor('gn')" title="Inserir {{GN}}">+ {{GN}}</button>
+              </div>
+            </div>
+
+            <!-- Área de Conteúdo Editável com Semântica de Acessibilidade -->
+            <div id="corpoEditor" class="rich-editor-content custom-scrollbar" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Corpo da mensagem" data-placeholder="Olá {{Nome}},&#10;&#10;Escreva o conteúdo da sua mensagem aqui...&#10;&#10;Você pode usar as tags acima para personalizar com o Nome e a Empresa de cada contato."></div>
+
+            <!-- Rodapé do Editor com Contadores e Auto-save -->
+            <div class="flex items-center justify-between px-3 py-1.5 border-t border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] text-slate-500 dark:text-slate-400">
+              <span id="contadorCorpo" class="font-mono">0 palavras · 0 caracteres</span>
+              <div class="flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span id="statusRascunho">Salvo localmente</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linha Compacta de Assinatura Sincronizada -->
+        <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10 text-xs">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+            <span id="txtAssinaturaStatus" class="truncate text-[11px] text-slate-600 dark:text-slate-300 font-medium">
+              Carregando assinatura oficial...
+            </span>
+          </div>
+          <button type="button" onclick="puxarAssinaturaOficial()" class="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 shrink-0 ml-2" title="Recarregar assinatura da conta oficial do Gmail">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Recarregar
+          </button>
+          <textarea id="assinatura" class="hidden"></textarea>
+        </div>
+      </section>
+
+      <!-- COLUMN 2: RECIPIENTS & DISPATCH CONTROLLER (6/12) -->
+      <section class="lg:col-span-6 app-card p-5 space-y-4 flex flex-col justify-between min-w-0">
+        <div class="space-y-4">
+          <!-- Section Header & Table Actions -->
+          <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-200 dark:border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="flex items-center justify-center w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-white/10">2</span>
+              <div class="flex items-baseline gap-2">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Destinatários</h2>
+                <span id="contador" class="text-[11px] font-mono text-slate-500 dark:text-slate-400">0 contatos válidos</span>
+              </div>
+            </div>
+
+            <!-- Top Table Buttons -->
+            <div class="flex items-center gap-1.5 flex-nowrap">
+              <button type="button" onclick="abrirModal('modalImportar')" class="btn-secondary !text-xs !py-1.5 !px-2.5" title="Importar ou colar planilha do Google Sheets ou Excel">
+                <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Colar Planilha
+              </button>
+              <button type="button" onclick="adicionarLinhaVazia()" class="btn-secondary !text-xs !py-1.5 !px-2.5" title="Adicionar linha manual">
+                <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                + Linha
+              </button>
+              <button type="button" onclick="limparTabelaCompleta()" class="btn-secondary !text-xs !py-1.5 !px-2.5 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-300 dark:hover:border-rose-800/60 transition-colors" title="Limpar todas as linhas">
+                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Limpar
+              </button>
+            </div>
+          </div>
+
+          <!-- Opções Auxiliares: CC/CCO Trigger + Coluna GN Toggle -->
+          <div id="containerOpcoesEnvio" class="flex items-center justify-between text-xs py-0.5">
+            <button type="button" id="btnToggleCcCco" onclick="alternarVisibilidadeCcCco()" class="text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center gap-1 transition-colors focus:outline-none">
+              <span id="rotuloToggleCcCco">+ Adicionar CC/CCO</span>
+            </button>
+
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 select-none transition-colors">
+              <input type="checkbox" id="chkHabilitarGN" onchange="alternarColunaGN()" class="w-3.5 h-3.5 rounded text-indigo-600 border-slate-300 dark:border-white/20 focus:ring-indigo-500" />
+              <span>Habilitar coluna GN <span class="font-mono text-[11px] text-slate-400">({{GN}})</span></span>
+            </label>
+          </div>
+
+          <!-- Painel CC e CCO (Progressive Disclosure - integrado diretamente no fluxo) -->
+          <div id="painelCcCco" class="hidden space-y-2.5 p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <label for="campoCc" class="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                    CC <span class="text-slate-400 font-normal">(com cópia)</span>
+                  </label>
+                  <span id="badgeCcContador" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 hidden"></span>
+                </div>
+                <input type="text" id="campoCc" class="form-input !py-1 !text-xs" placeholder="gestor@empresa.com, equipe@empresa.com" />
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <label for="campoCco" class="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                    CCO <span class="text-slate-400 font-normal">(cópia oculta)</span>
+                  </label>
+                  <span id="badgeCcoContador" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 hidden"></span>
+                </div>
+                <input type="text" id="campoCco" class="form-input !py-1 !text-xs" placeholder="diretoria@empresa.com" />
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-[11px] text-slate-400 dark:text-slate-500 pt-0.5">
+              <span>Estes endereços receberão uma cópia de cada mensagem enviada no lote.</span>
+              <div id="avisoCcCco" class="hidden text-[11px] text-rose-500 font-medium"></div>
+            </div>
+          </div>
+
+          <!-- Tabela de Destinatários -->
+          <div class="rounded-lg border border-slate-200 dark:border-white/10 overflow-hidden bg-white dark:bg-slate-900/40">
+            <div class="overflow-x-auto custom-scrollbar max-h-[380px]">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-semibold border-b border-slate-200 dark:border-white/10 sticky top-0 z-10">
+                    <th class="py-2.5 px-2 w-9 text-center font-mono text-slate-400">#</th>
+                    <th class="py-2.5 px-2 th-nome" style="width: 30%;">Nome</th>
+                    <th class="py-2.5 px-2 th-email text-slate-700 dark:text-slate-200 font-medium" style="width: 38%;">E-mail</th>
+                    <th class="py-2.5 px-2 th-empresa" style="width: 28%;">Empresa</th>
+                    <th class="py-2.5 px-2 col-gn hidden" style="width: 24%;">GN</th>
+                    <th class="py-2.5 px-1.5 w-8 text-center" aria-label="Ações"></th>
+                  </tr>
+                </thead>
+                <tbody id="corpoTabela" class="divide-y divide-slate-100 dark:divide-white/5"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-400 flex items-center justify-between">
+            <span>Dica: Cole linhas diretamente do Sheets (<kbd class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 font-mono text-[11px]">Ctrl+V</kbd>)</span>
+            <span class="font-mono">Máx: 50/lote</span>
+          </div>
+        </div>
+
+        <!-- Action Area (Rodapé Operacional Integrado) -->
+        <div class="pt-3 border-t border-slate-200 dark:border-white/10 space-y-3 mt-auto">
+          <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span id="actionAreaResumo" class="font-medium text-[11px] text-slate-600 dark:text-slate-300">
+              0 destinatários válidos · Consumo estimado: 0 envios
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <button type="button" onclick="abrirPreview()" class="btn-secondary !py-2.5 sm:col-span-1 justify-center text-xs" title="Visualizar mensagem renderizada antes do envio">
+              <svg class="w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Prévia Realista
+            </button>
+
+            <button type="button" id="btnDisparar" onclick="prepararDisparo()" class="btn-primary !py-2.5 sm:col-span-2 justify-center text-xs font-semibold" title="Abrir modal de revisão e confirmação do lote">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Revisar e Disparar Lote
+            </button>
+          </div>
+
+          <!-- Caixa de Status / Relatório -->
+          <div id="status" class="hidden rounded-lg p-3 text-xs border transition-all"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Minimalist Footer -->
+    <footer class="pt-4 pb-6 text-center text-xs text-slate-400 dark:text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-slate-200/60 dark:border-white/5">
+      <span>IPNET Advanced Cloud Solutions · Ambiente Seguro Google Workspace</span>
+      <span class="font-mono text-[11px]">Desenvolvido por: <strong class="text-slate-600 dark:text-slate-400 font-semibold">phellipe.souza@ipnet.cloud</strong></span>
+    </footer>
+  </div>
+
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal 1: Pré-visualização Realista de E-mail (Client View) -->
+  <div id="modalPreview" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tituloPreview">
+    <div class="app-card w-full max-w-2xl overflow-hidden shadow-2xl border-slate-200 dark:border-white/20">
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <h2 id="tituloPreview" class="text-xs font-semibold text-slate-900 dark:text-white">Pré-visualização do Cliente de E-mail</h2>
+        </div>
+        <button type="button" onclick="fecharModal('modalPreview')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-lg font-bold px-1" aria-label="Fechar">✕</button>
+      </div>
+
+      <!-- CCO Administrative Notification (oculto no e-mail real) -->
+      <div id="previewCcoAviso" class="hidden px-5 py-1.5 bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-white/10 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="previewCcoTextoAviso">CCO configurado: 0 destinatários</span>
+        </div>
+        <span class="text-[10px] text-slate-400 italic">Oculto para o cliente</span>
+      </div>
+
+      <!-- Simulated Email Client Header -->
+      <div class="px-5 py-3 bg-white dark:bg-slate-900/60 border-b border-slate-200 dark:border-white/10 space-y-1.5 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-medium w-16">De:</span>
+          <span id="previewDe" class="font-medium text-slate-800 dark:text-slate-200">remetente@empresa.com</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-medium w-16">Para:</span>
+          <span id="previewDestinatario" class="font-medium text-slate-800 dark:text-slate-200">destinatario@empresa.com</span>
+        </div>
+        <div id="previewContainerCc" class="hidden flex items-center gap-2">
+          <span class="text-slate-400 font-medium w-16">Cc:</span>
+          <span id="previewCc" class="font-medium text-slate-800 dark:text-slate-200"></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-medium w-16">Assunto:</span>
+          <span id="previewAssunto" class="font-semibold text-slate-900 dark:text-white"></span>
+        </div>
+      </div>
+
+      <!-- Email Body Container -->
+      <div class="p-6 bg-slate-50/50 dark:bg-slate-950 max-h-[55vh] overflow-y-auto custom-scrollbar">
+        <div id="previewCorpo" class="max-w-xl mx-auto p-5 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 font-sans text-sm leading-relaxed"></div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-5 py-3 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-white/10 flex justify-end">
+        <button type="button" onclick="fecharModal('modalPreview')" class="btn-secondary text-xs">Fechar Prévia</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 2: Confirmação de Disparo -->
+  <div id="modalConfirmacao" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tituloConfirmacao">
+    <div class="app-card w-full max-w-md p-5 space-y-4 shadow-2xl border-slate-200 dark:border-white/20">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 id="tituloConfirmacao" class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Confirmar Disparo em Lote
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Revise as informações antes de iniciar o envio sequencial.
+          </p>
+        </div>
+        <button type="button" onclick="fecharModal('modalConfirmacao')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-lg font-bold px-1" aria-label="Fechar">✕</button>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900/60 divide-y divide-slate-200 dark:divide-white/10 text-xs">
+        <div class="p-3 flex items-center justify-between">
+          <span class="text-slate-500 dark:text-slate-400 font-medium">Destinatários</span>
+          <span id="confirmacaoQuantidade" class="font-bold text-sm text-indigo-600 dark:text-indigo-400 font-mono">0</span>
+        </div>
+        <div class="p-3 flex items-center justify-between">
+          <span class="text-slate-500 dark:text-slate-400 font-medium">Consumo estimado da cota</span>
+          <span id="confirmacaoConsumoCota" class="font-bold text-sm text-indigo-600 dark:text-indigo-400 font-mono">0</span>
+        </div>
+        <div class="p-3 flex items-center justify-between">
+          <span class="text-slate-500 dark:text-slate-400 font-medium">Remetente</span>
+          <span id="confirmacaoRemetente" class="font-mono text-slate-700 dark:text-slate-300 text-[11px] truncate max-w-[220px]"></span>
+        </div>
+        <div id="confirmacaoLinhaCc" class="hidden p-3 flex items-start justify-between gap-2">
+          <span class="text-slate-500 dark:text-slate-400 font-medium shrink-0">CC</span>
+          <span id="confirmacaoCc" class="font-mono text-slate-700 dark:text-slate-300 text-[11px] text-right break-all"></span>
+        </div>
+        <div id="confirmacaoLinhaCco" class="hidden p-3 flex items-start justify-between gap-2">
+          <span class="text-slate-500 dark:text-slate-400 font-medium shrink-0">CCO</span>
+          <span id="confirmacaoCco" class="font-mono text-slate-700 dark:text-slate-300 text-[11px] text-right break-all"></span>
+        </div>
+        <div class="p-3 space-y-1">
+          <span class="text-slate-500 dark:text-slate-400 font-medium block">Assunto</span>
+          <div id="confirmacaoAssunto" class="font-medium text-slate-800 dark:text-slate-200 break-words"></div>
+        </div>
+      </div>
+
+      <!-- Aviso discreto em âmbar sobre envios individualizados para CC/CCO -->
+      <div id="confirmacaoAvisoCcCco" class="hidden p-2.5 rounded-lg bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/50 text-[11px] text-amber-800 dark:text-amber-300 flex items-start gap-2">
+        <svg class="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="confirmacaoTextoAvisoCcCco" class="leading-relaxed"></span>
+      </div>
+
+      <div class="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/40 text-[11px] text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
+        <svg class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Envio com intervalo preventivo de ~300ms entre mensagens para segurança anti-spam.</span>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="fecharModal('modalConfirmacao')" class="btn-secondary text-xs">
+          Voltar e Revisar
+        </button>
+        <button type="button" onclick="executarDisparoConfirmado()" id="btnConfirmarDisparo" class="btn-primary text-xs">
+          Iniciar Envio
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 3: Importação de Planilha (Excel / Google Sheets) -->
+  <div id="modalImportar" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tituloImportar">
+    <div class="app-card w-full max-w-xl p-5 space-y-4 shadow-2xl border-slate-200 dark:border-white/20">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 id="tituloImportar" class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            Importar Dados da Planilha
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Cole as colunas copiadas do Google Sheets ou Excel (separadas por tabulação ou vírgula).
+          </p>
+        </div>
+        <button type="button" onclick="fecharModal('modalImportar')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-lg font-bold px-1" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-medium text-slate-600 dark:text-slate-300">Cole o conteúdo copiado:</span>
+          <span id="contadorLinhasImportacao" class="font-mono text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">0 linhas detectadas</span>
+        </div>
+        <textarea id="txtAreaImportar" rows="7" oninput="atualizarContadorImportacao()" class="form-input !font-mono !text-xs custom-scrollbar" placeholder="Exemplo de conteúdo copiado da planilha:&#10;Nome&#9;E-mail&#9;Empresa&#9;GN&#10;Ana Silva&#9;ana@empresa.com&#9;Acme Corp&#9;Carlos Gestor&#10;Bruno Lima&#9;bruno@teste.com&#9;Tech Ltda&#9;Carlos Gestor"></textarea>
+      </div>
+
+      <div class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+        <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Detecta automaticamente colunas com cabeçalhos: Nome, E-mail, Empresa e GN.</span>
+      </div>
+
+      <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-1">
+        <button type="button" onclick="fecharModal('modalImportar')" class="btn-secondary text-xs">Cancelar</button>
+        <button type="button" onclick="executarImportacao(false)" class="btn-secondary text-xs">
+          + Adicionar ao Final
+        </button>
+        <button type="button" onclick="executarImportacao(true)" class="btn-primary text-xs">
+          Substituir Tabela
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    var editor = document.getElementById('corpoEditor');
+    var ultimoRangeEditor = null;
+    var timerRascunho = null;
+    var lotePendente = null;
+    var dadosUsuarioApp = { email: '', cotaRestante: null, assinaturaHtml: '', aliases: [], logos: null };
+
+    // Inicialização
+    iniciarAplicacao();
+
+    function iniciarAplicacao() {
+      carregarPreferencias();
+      configurarEventos();
+      carregarDadosServidor();
+
+      // Cria 3 linhas iniciais na tabela se vazia
+      var tabela = document.getElementById('corpoTabela');
+      if (tabela.rows.length === 0) {
+        for (var i = 0; i < 3; i++) adicionarLinhaVazia();
+      }
+
+      // Restaura preferência da coluna GN
+      var gnPref = localStorage.getItem('disparador_habilitar_gn');
+      if (gnPref === 'true') {
+        var chk = document.getElementById('chkHabilitarGN');
+        if (chk) {
+          chk.checked = true;
+          alternarColunaGN();
+        }
+      }
+
+      atualizarContadores();
+      atualizarContagemEditor();
+    }
+
+    function reindexarTabela() {
+      var linhas = document.querySelectorAll('#corpoTabela tr');
+      linhas.forEach(function(tr, index) {
+        var num = index + 1;
+        var celula = tr.querySelector('.numero-index');
+        if (celula) celula.textContent = num;
+
+        var inputNome = tr.querySelector('.campo-nome');
+        if (inputNome) inputNome.setAttribute('aria-label', 'Nome do destinatário — linha ' + num);
+
+        var inputEmail = tr.querySelector('.campo-email');
+        if (inputEmail) inputEmail.setAttribute('aria-label', 'E-mail — linha ' + num);
+
+        var inputEmpresa = tr.querySelector('.campo-empresa');
+        if (inputEmpresa) inputEmpresa.setAttribute('aria-label', 'Empresa — linha ' + num);
+
+        var inputGn = tr.querySelector('.campo-gn');
+        if (inputGn) inputGn.setAttribute('aria-label', 'GN — linha ' + num);
+
+        var btnRemover = tr.querySelector('button[aria-label^="Remover"]');
+        if (btnRemover) btnRemover.setAttribute('aria-label', 'Remover linha ' + num);
+      });
+    }
+
+    function alternarColunaGN() {
+      var habilitado = document.getElementById('chkHabilitarGN').checked;
+      localStorage.setItem('disparador_habilitar_gn', habilitado ? 'true' : 'false');
+
+      var btnAssuntoGN = document.getElementById('btnAssuntoGN');
+      var btnEditorGN = document.getElementById('btnEditorGN');
+      if (btnAssuntoGN) btnAssuntoGN.classList.toggle('hidden', !habilitado);
+      if (btnEditorGN) btnEditorGN.classList.toggle('hidden', !habilitado);
+
+      document.querySelectorAll('.col-gn').forEach(function(el) {
+        el.classList.toggle('hidden', !habilitado);
+      });
+
+      var thNome = document.querySelector('.th-nome');
+      var thEmail = document.querySelector('.th-email');
+      var thEmpresa = document.querySelector('.th-empresa');
+
+      if (thNome && thEmail && thEmpresa) {
+        if (habilitado) {
+          thNome.style.width = '24%';
+          thEmail.style.width = '30%';
+          thEmpresa.style.width = '24%';
+        } else {
+          thNome.style.width = '32%';
+          thEmail.style.width = '38%';
+          thEmpresa.style.width = '30%';
+        }
+      }
+    }
+
+    function limparTabelaCompleta() {
+      var tabela = document.getElementById('corpoTabela');
+      tabela.innerHTML = '';
+      for (var i = 0; i < 3; i++) {
+        adicionarLinhaVazia();
+      }
+      reindexarTabela();
+      atualizarContadores();
+      mostrarStatus('Lista Reiniciada', 'A tabela de destinatários foi limpa.', 'neutral');
+    }
+
+    function carregarDadosServidor() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (!res) return;
+            dadosUsuarioApp = res;
+
+            if (res.email) {
+              document.getElementById('userEmailText').textContent = res.email;
+            }
+            if (res.cotaRestante !== undefined && res.cotaRestante !== null) {
+              document.getElementById('quotaText').textContent = (typeof res.cotaRestante === 'number' ? res.cotaRestante.toLocaleString('pt-BR') : res.cotaRestante) + ' disponíveis';
+            }
+            if (res.aliases && res.aliases.length > 1) {
+              var select = document.getElementById('selectAlias');
+              select.innerHTML = '';
+              res.aliases.forEach(function(a) {
+                var opt = document.createElement('option');
+                opt.value = a.email;
+                opt.dataset.nome = a.nome || '';
+                opt.textContent = a.email + (a.padrao ? ' (Padrão)' : '');
+                if (a.padrao) opt.selected = true;
+                select.appendChild(opt);
+              });
+              document.getElementById('containerAlias').classList.remove('hidden');
+              document.getElementById('containerAlias').classList.add('flex');
+            }
+
+            if (res.logos) {
+              atualizarLogoEmpresa();
+            }
+
+            var statusTxt = document.getElementById('txtAssinaturaStatus');
+            if (res.assinaturaHtml) {
+              var assAtual = document.getElementById('assinatura').value.trim();
+              if (!assAtual || assAtual.indexOf('http') === 0 || assAtual.length < 5) {
+                document.getElementById('assinatura').value = res.assinaturaHtml;
+                salvarRascunho();
+              }
+              if (statusTxt) statusTxt.textContent = 'Sincronizada da conta ' + (res.email || 'do Gmail');
+            } else {
+              if (statusTxt) statusTxt.textContent = 'Nenhuma assinatura padrão encontrada no Gmail';
+            }
+          })
+          .withFailureHandler(function(err) {
+            document.getElementById('userEmailText').textContent = 'Usuário Ativo';
+            document.getElementById('quotaText').textContent = 'Cota: Ativa';
+            console.log('Aviso ao consultar backend:', err);
+          })
+          .obterAssinaturaEInfoUsuario();
+      } else {
+        // Fallback para teste local em navegador fora do Apps Script
+        document.getElementById('userEmailText').textContent = 'usuario.demo@ipnet.cloud';
+        document.getElementById('quotaText').textContent = '1.500 disponíveis';
+        document.getElementById('txtAssinaturaStatus').textContent = 'Modo de teste em navegador';
+      }
+    }
+
+    function puxarAssinaturaOficial() {
+      var statusTxt = document.getElementById('txtAssinaturaStatus');
+      if (statusTxt) statusTxt.textContent = 'Consultando assinatura no Gmail...';
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.assinaturaHtml) {
+              dadosUsuarioApp = res;
+              document.getElementById('assinatura').value = res.assinaturaHtml;
+              salvarRascunho();
+              if (statusTxt) statusTxt.textContent = 'Sincronizada da conta ' + (res.email || 'do Gmail');
+              mostrarStatus('Assinatura Atualizada', 'A assinatura oficial do Gmail foi carregada.', 'green');
+            } else {
+              if (statusTxt) statusTxt.textContent = 'Nenhuma assinatura configurada no Gmail.';
+              mostrarStatus('Aviso', 'Nenhuma assinatura foi retornada pelo Gmail.', 'yellow');
+            }
+          })
+          .obterAssinaturaEInfoUsuario();
+      } else {
+        mostrarStatus('Assinatura', 'Ambiente de teste: assinatura simulada carregada.', 'green');
+      }
+    }
+
+    function atualizarIconeTema(isDark) {
+      var icone = document.getElementById('iconeTema');
+      if (!icone) return;
+      if (isDark) {
+        icone.innerHTML = '<svg class="w-3.5 h-3.5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+      } else {
+        icone.innerHTML = '<svg class="w-3.5 h-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+      }
+    }
+
+    function carregarPreferencias() {
+      var theme = localStorage.getItem('disparador_theme');
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('theme')) {
+        theme = urlParams.get('theme');
+      }
+      if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        atualizarIconeTema(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        atualizarIconeTema(false);
+      }
+
+      document.getElementById('assunto').value = localStorage.getItem('disparador_assunto') || '';
+      document.getElementById('assinatura').value = localStorage.getItem('disparador_assinatura') || '';
+
+      var corpoSalvo = localStorage.getItem('disparador_corpo_visual');
+      if (corpoSalvo) editor.innerHTML = corpoSalvo;
+
+      // Restaura CC e CCO
+      var ccSalvo = localStorage.getItem('disparador_cc') || '';
+      var ccoSalvo = localStorage.getItem('disparador_cco') || '';
+      var campoCc = document.getElementById('campoCc');
+      var campoCco = document.getElementById('campoCco');
+      if (campoCc) campoCc.value = ccSalvo;
+      if (campoCco) campoCco.value = ccoSalvo;
+
+      if (ccSalvo.trim() || ccoSalvo.trim()) {
+        alternarVisibilidadeCcCco(true);
+        validarCamposCcCcoVisual();
+      }
+    }
+
+    function configurarEventos() {
+      document.getElementById('assunto').addEventListener('input', function() {
+        atualizarContadorAssunto();
+        agendarSalvamento();
+      });
+
+      document.getElementById('assinatura').addEventListener('input', agendarSalvamento);
+
+      var campoCc = document.getElementById('campoCc');
+      var campoCco = document.getElementById('campoCco');
+      if (campoCc) {
+        campoCc.addEventListener('input', function() {
+          validarCamposCcCcoVisual();
+          atualizarContadores();
+          agendarSalvamento();
+        });
+      }
+      if (campoCco) {
+        campoCco.addEventListener('input', function() {
+          validarCamposCcCcoVisual();
+          atualizarContadores();
+          agendarSalvamento();
+        });
+      }
+
+      editor.addEventListener('input', function() {
+        atualizarContagemEditor();
+        agendarSalvamento();
+      });
+
+      // Cola texto plano ou com quebras no editor evitando quebrar a formatação
+      editor.addEventListener('paste', function(evento) {
+        evento.preventDefault();
+        var texto = (evento.clipboardData || window.clipboardData).getData('text/plain');
+        restaurarSelecaoEditor();
+        inserirTextoPlanoNoEditor(texto);
+      });
+
+      document.addEventListener('selectionchange', guardarSelecaoEditor);
+
+      document.addEventListener('keydown', function(evento) {
+        if (evento.key === 'Escape') {
+          fecharModal('modalPreview');
+          fecharModal('modalConfirmacao');
+          fecharModal('modalImportar');
+        }
+      });
+
+      document.querySelectorAll('.modal-overlay').forEach(function(modal) {
+        modal.addEventListener('click', function(evento) {
+          if (evento.target === modal) fecharModal(modal.id);
+        });
+      });
+
+      // Suporte para colar planilha diretamente quando o foco estiver na tabela
+      var tabelaContainer = document.getElementById('corpoTabela');
+      if (tabelaContainer) {
+        document.addEventListener('paste', function(evento) {
+          var target = evento.target;
+          if (target && target.closest('table') && !target.closest('#corpoEditor')) {
+            var texto = (evento.clipboardData || window.clipboardData).getData('text/plain');
+            if (texto && (texto.indexOf('\t') >= 0 || texto.indexOf('\n') >= 0)) {
+              evento.preventDefault();
+              document.getElementById('txtAreaImportar').value = texto;
+              atualizarContadorImportacao();
+              abrirModal('modalImportar');
+            }
+          }
+        });
+      }
+
+      atualizarContadorAssunto();
+    }
+
+    function inserirTextoPlanoNoEditor(texto) {
+      var html = escaparHtmlCliente(String(texto || ''))
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\n/g, '<br>');
+
+      document.execCommand('insertHTML', false, html);
+    }
+
+    function escaparHtmlCliente(valor) {
+      var div = document.createElement('div');
+      div.textContent = String(valor || '');
+      return div.innerHTML;
+    }
+
+    function guardarSelecaoEditor() {
+      var selecao = window.getSelection();
+      if (!selecao || !selecao.rangeCount) return;
+      if (!editor.contains(selecao.anchorNode)) return;
+
+      ultimoRangeEditor = selecao.getRangeAt(0).cloneRange();
+      atualizarEstadoToolbar();
+    }
+
+    function restaurarSelecaoEditor() {
+      editor.focus();
+      if (!ultimoRangeEditor) return;
+
+      var selecao = window.getSelection();
+      selecao.removeAllRanges();
+      selecao.addRange(ultimoRangeEditor);
+    }
+
+    function executarComando(comando, valor) {
+      restaurarSelecaoEditor();
+      document.execCommand(comando, false, valor || null);
+      guardarSelecaoEditor();
+      atualizarContagemEditor();
+      agendarSalvamento();
+    }
+
+    function inserirLinkDialogo() {
+      restaurarSelecaoEditor();
+      var url = prompt('Digite a URL do link (ex: https://ipnet.cloud):', 'https://');
+      if (url && url.trim() && url !== 'https://') {
+        executarComando('createLink', url.trim());
+      }
+    }
+
+    function atualizarEstadoToolbar() {
+      var btnBold = document.getElementById('btnBold');
+      var btnItalic = document.getElementById('btnItalic');
+      var btnUnderline = document.getElementById('btnUnderline');
+      var btnBullet = document.getElementById('btnBullet');
+      var btnNumbered = document.getElementById('btnNumbered');
+
+      if (btnBold) btnBold.classList.toggle('active', !!document.queryCommandState('bold'));
+      if (btnItalic) btnItalic.classList.toggle('active', !!document.queryCommandState('italic'));
+      if (btnUnderline) btnUnderline.classList.toggle('active', !!document.queryCommandState('underline'));
+      if (btnBullet) btnBullet.classList.toggle('active', !!document.queryCommandState('insertUnorderedList'));
+      if (btnNumbered) btnNumbered.classList.toggle('active', !!document.queryCommandState('insertOrderedList'));
+    }
+
+    function inserirVariavelNoEditor(tipo) {
+      restaurarSelecaoEditor();
+
+      var token = tipo === 'nome' ? '{{Nome}}' : (tipo === 'empresa' ? '{{Empresa}}' : '{{GN}}');
+      var chip = document.createElement('span');
+      chip.className = 'variable-token';
+      chip.contentEditable = 'false';
+      chip.dataset.token = token;
+      chip.textContent = token;
+
+      var selecao = window.getSelection();
+      var range = selecao && selecao.rangeCount ? selecao.getRangeAt(0) : null;
+
+      if (!range || !editor.contains(range.commonAncestorContainer)) {
+        editor.appendChild(chip);
+        editor.appendChild(document.createTextNode('\u00a0'));
+      } else {
+        range.deleteContents();
+        range.insertNode(chip);
+        range.setStartAfter(chip);
+        range.collapse(true);
+
+        var espaco = document.createTextNode('\u00a0');
+        range.insertNode(espaco);
+        range.setStartAfter(espaco);
+        range.collapse(true);
+
+        selecao.removeAllRanges();
+        selecao.addRange(range);
+        ultimoRangeEditor = range.cloneRange();
+      }
+
+      atualizarContagemEditor();
+      agendarSalvamento();
+    }
+
+    function inserirVariavelNoAssunto(token) {
+      var input = document.getElementById('assunto');
+      var inicio = input.selectionStart || input.value.length;
+      var fim = input.selectionEnd || input.value.length;
+
+      input.value = input.value.substring(0, inicio) + token + input.value.substring(fim);
+      input.focus();
+      input.setSelectionRange(inicio + token.length, inicio + token.length);
+      atualizarContadorAssunto();
+      agendarSalvamento();
+    }
+
+    function atualizarContadorAssunto() {
+      var total = document.getElementById('assunto').value.length;
+      document.getElementById('contadorAssunto').textContent = total + ' / 250';
+    }
+
+    function atualizarContagemEditor() {
+      var texto = obterConteudoEditor().texto.trim();
+      var palavras = texto ? texto.split(/\s+/).filter(Boolean).length : 0;
+      document.getElementById('contadorCorpo').textContent = palavras + ' palavra(s) · ' + texto.length + ' caracteres';
+    }
+
+    function agendarSalvamento() {
+      document.getElementById('statusRascunho').textContent = 'Salvando...';
+      clearTimeout(timerRascunho);
+      timerRascunho = setTimeout(salvarRascunho, 350);
+    }
+
+    function salvarRascunho() {
+      localStorage.setItem('disparador_assunto', document.getElementById('assunto').value);
+      localStorage.setItem('disparador_corpo_visual', editor.innerHTML);
+      localStorage.setItem('disparador_assinatura', document.getElementById('assinatura').value);
+      var campoCc = document.getElementById('campoCc');
+      var campoCco = document.getElementById('campoCco');
+      localStorage.setItem('disparador_cc', campoCc ? campoCc.value : '');
+      localStorage.setItem('disparador_cco', campoCco ? campoCco.value : '');
+      document.getElementById('statusRascunho').textContent = 'Salvo localmente';
+    }
+
+    function obterConteudoEditor() {
+      var clone = editor.cloneNode(true);
+
+      clone.querySelectorAll('.variable-token').forEach(function(chip) {
+        chip.replaceWith(document.createTextNode(chip.dataset.token || chip.textContent));
+      });
+
+      clone.querySelectorAll('*').forEach(function(elemento) {
+        elemento.removeAttribute('class');
+        elemento.removeAttribute('id');
+        elemento.removeAttribute('contenteditable');
+        elemento.removeAttribute('data-token');
+      });
+
+      return {
+        html: clone.innerHTML.trim(),
+        texto: extrairTextoPlano(clone).trim()
+      };
+    }
+
+    function extrairTextoPlano(elemento) {
+      function percorrer(no) {
+        if (no.nodeType === Node.TEXT_NODE) return no.nodeValue || '';
+        if (no.nodeType !== Node.ELEMENT_NODE) return '';
+
+        var tag = no.tagName.toLowerCase();
+        if (tag === 'br') return '\n';
+
+        var conteudo = '';
+        Array.prototype.forEach.call(no.childNodes, function(filho) {
+          conteudo += percorrer(filho);
+        });
+
+        if (tag === 'li') return '• ' + conteudo.trim() + '\n';
+        if (tag === 'p' || tag === 'div') return conteudo.trimEnd() + '\n';
+        if (tag === 'ul' || tag === 'ol') return conteudo + '\n';
+        return conteudo;
+      }
+
+      return percorrer(elemento)
+        .replace(/\u00a0/g, ' ')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n');
+    }
+
+    function abrirPreview() {
+      var assunto = document.getElementById('assunto').value.trim();
+      var conteudo = obterConteudoEditor();
+
+      if (!assunto || !conteudo.texto.trim()) {
+        mostrarStatus('Atenção', 'Preencha o assunto e o corpo da mensagem para visualizar a prévia.', 'yellow');
+        return;
+      }
+
+      var contato = obterPrimeiroContatoPreenchido() || {
+        nome: 'Camila Ribeiro',
+        email: 'camila.ribeiro@empresa.com',
+        empresa: 'Empresa Exemplo',
+        gn: 'João Silva'
+      };
+
+      var remetenteEmail = 'voce@ipnet.cloud';
+      var selectAlias = document.getElementById('selectAlias');
+      if (selectAlias && selectAlias.value) {
+        remetenteEmail = selectAlias.value;
+      } else if (dadosUsuarioApp && dadosUsuarioApp.email) {
+        remetenteEmail = dadosUsuarioApp.email;
+      }
+
+      document.getElementById('previewDe').textContent = remetenteEmail;
+      document.getElementById('previewDestinatario').textContent = (contato.nome || 'Destinatário') + ' <' + contato.email + '>';
+      document.getElementById('previewAssunto').textContent = substituirVariaveisTexto(assunto, contato.nome, contato.empresa, contato.gn);
+
+      // Configura CC e CCO na pré-visualização
+      var proc = obterCcCcoProcessados();
+      var containerCc = document.getElementById('previewContainerCc');
+      var spanCc = document.getElementById('previewCc');
+      if (containerCc && spanCc) {
+        var ccParaPreview = proc.ccValidos.filter(function(e) { return e !== contato.email.toLowerCase(); });
+        if (ccParaPreview.length > 0) {
+          spanCc.textContent = ccParaPreview.join(', ');
+          containerCc.classList.remove('hidden');
+        } else {
+          containerCc.classList.add('hidden');
+        }
+      }
+
+      var avisoCco = document.getElementById('previewCcoAviso');
+      var txtAvisoCco = document.getElementById('previewCcoTextoAviso');
+      if (avisoCco && txtAvisoCco) {
+        var ccoParaPreview = proc.ccoValidos.filter(function(e) { return e !== contato.email.toLowerCase(); });
+        if (ccoParaPreview.length > 0) {
+          txtAvisoCco.textContent = 'CCO configurado: ' + ccoParaPreview.length + ' destinatário' + (ccoParaPreview.length > 1 ? 's' : '');
+          avisoCco.classList.remove('hidden');
+        } else {
+          avisoCco.classList.add('hidden');
+        }
+      }
+
+      var clone = editor.cloneNode(true);
+      substituirVariaveisNoClone(clone, contato.nome, contato.empresa, contato.gn);
+
+      var preview = document.getElementById('previewCorpo');
+      preview.innerHTML = '';
+      while (clone.firstChild) preview.appendChild(clone.firstChild);
+      adicionarAssinaturaNaPreview(preview);
+
+      abrirModal('modalPreview');
+    }
+
+    function substituirVariaveisNoClone(clone, nome, empresa, gn) {
+      clone.querySelectorAll('.variable-token').forEach(function(chip) {
+        var valor = chip.dataset.token === '{{Empresa}}' ? empresa : (chip.dataset.token === '{{GN}}' ? gn : nome);
+        chip.replaceWith(document.createTextNode(valor));
+      });
+
+      var walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+      var no;
+      while ((no = walker.nextNode())) {
+        no.nodeValue = substituirVariaveisTexto(no.nodeValue, nome, empresa, gn);
+      }
+    }
+
+    function adicionarAssinaturaNaPreview(preview) {
+      var assinatura = document.getElementById('assinatura').value.trim();
+      if (!assinatura) return;
+
+      var bloco = document.createElement('div');
+      bloco.style.marginTop = '24px';
+      bloco.style.paddingTop = '14px';
+      bloco.style.borderTop = '1px solid #e2e8f0';
+
+      if (/<[a-z][\s\S]*>/i.test(assinatura)) {
+        bloco.innerHTML = assinatura;
+      } else if (/^https?:\/\/[^\s]+$/i.test(assinatura)) {
+        var img = document.createElement('img');
+        img.src = assinatura;
+        img.alt = 'Assinatura';
+        img.style.maxWidth = '420px';
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        bloco.appendChild(img);
+      } else {
+        assinatura.split(/\r?\n/).forEach(function(linha, indice) {
+          if (indice > 0) bloco.appendChild(document.createElement('br'));
+          bloco.appendChild(document.createTextNode(linha));
+        });
+      }
+
+      preview.appendChild(bloco);
+    }
+
+    function substituirVariaveisTexto(texto, nome, empresa, gn) {
+      gn = gn || '';
+      return String(texto || '')
+        .replace(/{{\s*Nome\s*}}/gi, nome || 'Prezado(a)')
+        .replace(/{{\s*Empresa\s*}}/gi, empresa || 'sua empresa')
+        .replace(/{{\s*GN\s*}}/gi, gn);
+    }
+
+    function obterPrimeiroContatoPreenchido() {
+      var linhas = document.getElementById('corpoTabela').rows;
+      for (var i = 0; i < linhas.length; i++) {
+        var email = linhas[i].querySelector('.campo-email').value.trim();
+        if (!email) continue;
+
+        var gnInput = linhas[i].querySelector('.campo-gn');
+        return {
+          nome: linhas[i].querySelector('.campo-nome').value.trim(),
+          email: email,
+          empresa: linhas[i].querySelector('.campo-empresa').value.trim(),
+          gn: gnInput ? gnInput.value.trim() : ''
+        };
+      }
+      return null;
+    }
+
+    function alternarTema() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      atualizarIconeTema(isDark);
+      localStorage.setItem('disparador_theme', isDark ? 'dark' : 'light');
+      atualizarLogoEmpresa();
+    }
+
+    function atualizarLogoEmpresa() {
+      if (!dadosUsuarioApp || !dadosUsuarioApp.logos) return;
+      var isDark = document.documentElement.classList.contains('dark');
+      var rawUrl = isDark ? dadosUsuarioApp.logos.LOGO_DARK : dadosUsuarioApp.logos.LOGO_LIGHT;
+      var logoUrl = converterLinkGoogleDriveCliente(rawUrl);
+
+      var img = document.getElementById('logoImg');
+      var fallback = document.getElementById('logoFallback');
+
+      if (logoUrl && logoUrl.trim()) {
+        img.src = logoUrl.trim();
+        img.onerror = function() {
+          img.classList.add('hidden');
+          fallback.classList.remove('hidden');
+        };
+        img.onload = function() {
+          img.classList.remove('hidden');
+          fallback.classList.add('hidden');
+        };
+      } else {
+        img.classList.add('hidden');
+        fallback.classList.remove('hidden');
+      }
+    }
+
+    function converterLinkGoogleDriveCliente(url) {
+      if (!url || typeof url !== 'string') return '';
+      var link = url.trim();
+      var matchFile = link.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (matchFile && matchFile[1]) return 'https://lh3.googleusercontent.com/d/' + matchFile[1];
+      var matchId = link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (matchId && matchId[1]) return 'https://lh3.googleusercontent.com/d/' + matchId[1];
+      return link;
+    }
+
+    function adicionarLinhaVazia(nome, email, empresa, gn) {
+      nome = nome || '';
+      email = email || '';
+      empresa = empresa || '';
+      gn = gn || '';
+
+      var tabela = document.getElementById('corpoTabela');
+      if (tabela.rows.length >= 50) {
+        mostrarStatus('Limite Máximo', 'O limite é de 50 destinatários por envio.', 'yellow');
+        return false;
+      }
+
+      var linhaNum = tabela.rows.length + 1;
+      var tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition-colors group';
+
+      var tdIndice = document.createElement('td');
+      tdIndice.className = 'py-1.5 px-2 text-center text-[11px] font-mono text-slate-400 numero-index';
+      tdIndice.textContent = linhaNum;
+
+      var tdNome = document.createElement('td');
+      tdNome.className = 'py-1 px-1.5';
+      tdNome.appendChild(criarInputTabela('text', 'campo-nome', nome, 'Nome', 'Nome do destinatário — linha ' + linhaNum));
+
+      var tdEmail = document.createElement('td');
+      tdEmail.className = 'py-1 px-1.5';
+      var inputEmail = criarInputTabela('email', 'campo-email', email, 'email@empresa.com', 'E-mail — linha ' + linhaNum);
+      inputEmail.addEventListener('input', function() {
+        validarEmailVisual(inputEmail);
+        atualizarContadores();
+      });
+      tdEmail.appendChild(inputEmail);
+
+      var tdEmpresa = document.createElement('td');
+      tdEmpresa.className = 'py-1 px-1.5';
+      tdEmpresa.appendChild(criarInputTabela('text', 'campo-empresa', empresa, 'Empresa', 'Empresa — linha ' + linhaNum));
+
+      var chk = document.getElementById('chkHabilitarGN');
+      var gnHabilitado = chk && chk.checked;
+      var tdGn = document.createElement('td');
+      tdGn.className = 'py-1 px-1.5 col-gn' + (gnHabilitado ? '' : ' hidden');
+      tdGn.appendChild(criarInputTabela('text', 'campo-gn', gn, 'Nome do GN', 'GN — linha ' + linhaNum));
+
+      var tdAcao = document.createElement('td');
+      tdAcao.className = 'py-1 px-1 text-center';
+      var botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'text-slate-400 hover:text-rose-500 p-1 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-rose-400';
+      botao.setAttribute('aria-label', 'Remover linha ' + linhaNum);
+      botao.setAttribute('title', 'Remover linha');
+      botao.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      botao.addEventListener('click', function() { removerLinha(botao); });
+      tdAcao.appendChild(botao);
+
+      tr.appendChild(tdIndice);
+      tr.appendChild(tdNome);
+      tr.appendChild(tdEmail);
+      tr.appendChild(tdEmpresa);
+      tr.appendChild(tdGn);
+      tr.appendChild(tdAcao);
+      tabela.appendChild(tr);
+
+      validarEmailVisual(inputEmail);
+      atualizarContadores();
+      return true;
+    }
+
+    function criarInputTabela(tipo, classe, valor, placeholder, ariaLabel) {
+      var input = document.createElement('input');
+      input.type = tipo;
+      input.className = classe + ' table-cell-input';
+      input.value = valor;
+      input.placeholder = placeholder;
+      if (ariaLabel) input.setAttribute('aria-label', ariaLabel);
+      input.addEventListener('input', atualizarContadores);
+      return input;
+    }
+
+    function removerLinha(botao) {
+      botao.closest('tr').remove();
+      reindexarTabela();
+      atualizarContadores();
+    }
+
+    function atualizarContadorImportacao() {
+      var txt = document.getElementById('txtAreaImportar').value;
+      var contatos = processarTextoPlanilha(txt);
+      document.getElementById('contadorLinhasImportacao').textContent = contatos.length + ' linha(s) detectada(s)';
+    }
+
+    function processarTextoPlanilha(texto) {
+      if (!texto || !texto.trim()) return [];
+      var linhas = texto.trim().split(/\r?\n/);
+      var resultado = [];
+
+      linhas.forEach(function(linhaRaw, index) {
+        var linha = linhaRaw.trim();
+        if (!linha) return;
+
+        var cols = linha.split(/[\t,;]/).map(function(c) {
+          return c.trim().replace(/^["']|["']$/g, '');
+        });
+
+        // Ignora linha de cabeçalho
+        if (index === 0) {
+          var unida = cols.join(' ').toLowerCase();
+          if ((unida.indexOf('nome') >= 0 || unida.indexOf('name') >= 0) && (unida.indexOf('e-mail') >= 0 || unida.indexOf('email') >= 0)) {
+            return;
+          }
+        }
+
+        var nome = cols[0] || '';
+        var email = cols[1] || '';
+        var empresa = cols[2] || '';
+        var gn = cols[3] || '';
+
+        // Se a primeira coluna parece e-mail e a segunda nome, ajusta
+        if (emailValido(nome) && !emailValido(email)) {
+          var tmp = nome;
+          nome = email;
+          email = tmp;
+        }
+
+        if (email || nome || empresa || gn) {
+          resultado.push({ nome: nome, email: email, empresa: empresa, gn: gn });
+        }
+      });
+
+      return resultado;
+    }
+
+    function executarImportacao(substituir) {
+      var txt = document.getElementById('txtAreaImportar').value;
+      var contatos = processarTextoPlanilha(txt);
+
+      if (contatos.length === 0) {
+        mostrarStatus('Atenção', 'Nenhum dado válido foi detectado no texto colado.', 'yellow');
+        return;
+      }
+
+      var temGn = contatos.some(function(c) { return !!c.gn; });
+      if (temGn) {
+        var chk = document.getElementById('chkHabilitarGN');
+        if (chk && !chk.checked) {
+          chk.checked = true;
+          alternarColunaGN();
+        }
+      }
+
+      var tabela = document.getElementById('corpoTabela');
+      if (substituir) {
+        tabela.innerHTML = '';
+      } else {
+        limparLinhasVazias();
+      }
+
+      var inseridos = 0;
+      contatos.forEach(function(c) {
+        if (tabela.rows.length < 50) {
+          adicionarLinhaVazia(c.nome, c.email, c.empresa, c.gn);
+          inseridos++;
+        }
+      });
+
+      reindexarTabela();
+      atualizarContadores();
+      fecharModal('modalImportar');
+      document.getElementById('txtAreaImportar').value = '';
+
+      mostrarStatus('Importação Concluída', inseridos + ' contato(s) adicionado(s) com sucesso.', 'green');
+    }
+
+    function limparLinhasVazias() {
+      document.querySelectorAll('#corpoTabela tr').forEach(function(linha) {
+        var nome = linha.querySelector('.campo-nome').value.trim();
+        var email = linha.querySelector('.campo-email').value.trim();
+        var empresa = linha.querySelector('.campo-empresa').value.trim();
+        if (!nome && !email && !empresa) linha.remove();
+      });
+
+      if (document.getElementById('corpoTabela').rows.length === 0) adicionarLinhaVazia();
+      reindexarTabela();
+      atualizarContadores();
+    }
+
+    function validarEmailVisual(input) {
+      var valor = input.value.trim();
+      var invalido = valor !== '' && !emailValido(valor);
+      input.classList.toggle('invalid-email', invalido);
+      input.title = invalido ? 'Formato de e-mail inválido.' : '';
+      return !invalido;
+    }
+
+    function emailValido(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || ''));
+    }
+
+    /**
+     * Processa e valida listas de e-mails (como CC e CCO)
+     * - Suporta múltiplos separadores (, ou ;)
+     * - Aplica trim
+     * - Converte para minúsculas para deduplicação
+     * - Remove entradas vazias
+     * - Valida com emailValido()
+     * - Remove duplicados
+     * - Retorna { validos: [...], erros: [...] }
+     */
+    function processarListaEmails(entrada) {
+      if (!entrada) return { validos: [], erros: [] };
+
+      var raw = '';
+      if (typeof entrada === 'string') {
+        raw = entrada;
+      } else if (Array.isArray(entrada)) {
+        raw = entrada.join(',');
+      } else {
+        raw = String(entrada);
+      }
+
+      var pedacos = raw.split(/[,;]/);
+      var validos = [];
+      var erros = [];
+      var vistos = {};
+
+      for (var i = 0; i < pedacos.length; i++) {
+        var item = pedacos[i].trim().toLowerCase();
+        if (!item) continue;
+
+        if (!emailValido(item)) {
+          erros.push(item);
+        } else if (!vistos[item]) {
+          vistos[item] = true;
+          validos.push(item);
+        }
+      }
+
+      return {
+        validos: validos,
+        erros: erros
+      };
+    }
+
+    function alternarVisibilidadeCcCco(forcarAberto) {
+      var painel = document.getElementById('painelCcCco');
+      var rotulo = document.getElementById('rotuloToggleCcCco');
+      if (!painel || !rotulo) return;
+
+      var deveAbrir = (typeof forcarAberto === 'boolean') ? forcarAberto : painel.classList.contains('hidden');
+
+      if (deveAbrir) {
+        painel.classList.remove('hidden');
+        rotulo.textContent = '- Ocultar CC/CCO';
+      } else {
+        painel.classList.add('hidden');
+        rotulo.textContent = '+ Adicionar CC/CCO';
+      }
+    }
+
+    function obterCcCcoProcessados() {
+      var campoCc = document.getElementById('campoCc');
+      var campoCco = document.getElementById('campoCco');
+      var rawCc = campoCc ? campoCc.value : '';
+      var rawCco = campoCco ? campoCco.value : '';
+
+      var resCc = processarListaEmails(rawCc);
+      var resCco = processarListaEmails(rawCco);
+
+      // Priorizar CC e remover do CCO se houver sobreposição
+      var ccValidos = resCc.validos;
+      var ccoValidos = resCco.validos.filter(function(email) {
+        return ccValidos.indexOf(email) === -1;
+      });
+
+      return {
+        rawCc: rawCc,
+        rawCco: rawCco,
+        ccValidos: ccValidos,
+        ccoValidos: ccoValidos,
+        errosCc: resCc.erros,
+        errosCco: resCco.erros,
+        temErros: resCc.erros.length > 0 || resCco.erros.length > 0
+      };
+    }
+
+    function validarCamposCcCcoVisual() {
+      var campoCc = document.getElementById('campoCc');
+      var campoCco = document.getElementById('campoCco');
+      var aviso = document.getElementById('avisoCcCco');
+      var badgeCc = document.getElementById('badgeCcContador');
+      var badgeCco = document.getElementById('badgeCcoContador');
+
+      var proc = obterCcCcoProcessados();
+
+      if (campoCc) {
+        var invalidoCc = proc.errosCc.length > 0;
+        campoCc.classList.toggle('invalid-email', invalidoCc);
+        campoCc.title = invalidoCc ? 'Endereço(s) inválido(s): ' + proc.errosCc.join(', ') : '';
+        if (badgeCc) {
+          if (proc.ccValidos.length > 0) {
+            badgeCc.textContent = proc.ccValidos.length + ' válido(s)';
+            badgeCc.classList.remove('hidden');
+          } else {
+            badgeCc.classList.add('hidden');
+          }
+        }
+      }
+
+      if (campoCco) {
+        var invalidoCco = proc.errosCco.length > 0;
+        campoCco.classList.toggle('invalid-email', invalidoCco);
+        campoCco.title = invalidoCco ? 'Endereço(s) inválido(s): ' + proc.errosCco.join(', ') : '';
+        if (badgeCco) {
+          if (proc.ccoValidos.length > 0) {
+            badgeCco.textContent = proc.ccoValidos.length + ' válido(s)';
+            badgeCco.classList.remove('hidden');
+          } else {
+            badgeCco.classList.add('hidden');
+          }
+        }
+      }
+
+      if (aviso) {
+        var msgs = [];
+        if (proc.errosCc.length > 0) {
+          msgs.push('CC inválido: ' + proc.errosCc.join(', '));
+        }
+        if (proc.errosCco.length > 0) {
+          msgs.push('CCO inválido: ' + proc.errosCco.join(', '));
+        }
+
+        if (msgs.length > 0) {
+          aviso.textContent = msgs.join(' | ');
+          aviso.classList.remove('hidden');
+        } else {
+          aviso.textContent = '';
+          aviso.classList.add('hidden');
+        }
+      }
+    }
+
+    function calcularConsumoEstimadoCota(contatos, ccValidos, ccoValidos) {
+      ccValidos = ccValidos || [];
+      ccoValidos = ccoValidos || [];
+      var total = 0;
+
+      for (var i = 0; i < contatos.length; i++) {
+        var email = contatos[i].email.toLowerCase();
+        var ccParaEste = ccValidos.filter(function(e) { return e !== email; });
+        var ccoParaEste = ccoValidos.filter(function(e) { return e !== email; });
+        total += (1 + ccParaEste.length + ccoParaEste.length);
+      }
+
+      return total;
+    }
+
+    function atualizarContadores() {
+      var linhas = document.getElementById('corpoTabela').rows;
+      var preenchidos = 0;
+      var validos = 0;
+
+      for (var i = 0; i < linhas.length; i++) {
+        var emailInput = linhas[i].querySelector('.campo-email');
+        var email = emailInput ? emailInput.value.trim() : '';
+        if (email) {
+          preenchidos++;
+          if (emailValido(email)) validos++;
+        }
+      }
+
+      document.getElementById('contador').textContent = validos + ' válido(s) · ' + linhas.length + ' linha(s)';
+
+      var elResumo = document.getElementById('actionAreaResumo');
+      if (elResumo) {
+        var analise = coletarContatosValidos();
+        var procCc = (typeof obterCcCcoProcessados === 'function') ? obterCcCcoProcessados() : { ccValidos: [], ccoValidos: [] };
+        var consumo = calcularConsumoEstimadoCota(analise.contatos, procCc.ccValidos, procCc.ccoValidos);
+        var n = analise.contatos.length;
+        elResumo.textContent = n + ' destinatários válidos · Consumo estimado: ' + consumo + ' envios';
+      }
+    }
+
+    function coletarContatosValidos() {
+      var linhas = document.getElementById('corpoTabela').rows;
+      var contatos = [];
+      var vistos = {};
+      var duplicados = 0;
+
+      for (var i = 0; i < linhas.length; i++) {
+        var nomeInput = linhas[i].querySelector('.campo-nome');
+        var emailInput = linhas[i].querySelector('.campo-email');
+        var empresaInput = linhas[i].querySelector('.campo-empresa');
+
+        var email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        if (!email || !emailValido(email)) continue;
+
+        if (vistos[email]) {
+          duplicados++;
+          continue;
+        }
+
+        var gnInput = linhas[i].querySelector('.campo-gn');
+        var gnValue = (gnInput && document.getElementById('chkHabilitarGN').checked) ? gnInput.value.trim() : '';
+
+        vistos[email] = true;
+        contatos.push({
+          nome: nomeInput ? nomeInput.value.trim() : '',
+          email: email,
+          empresa: empresaInput ? empresaInput.value.trim() : '',
+          gn: gnValue
+        });
+      }
+
+      return {
+        contatos: contatos,
+        duplicados: duplicados
+      };
+    }
+
+    function prepararDisparo() {
+      var assunto = document.getElementById('assunto').value.trim();
+      var conteudo = obterConteudoEditor();
+      var assinatura = document.getElementById('assinatura').value.trim();
+      var analiseContatos = coletarContatosValidos();
+      var procCcCco = obterCcCcoProcessados();
+
+      if (!assunto) {
+        mostrarStatus('Campo Obrigatório', 'Preencha o assunto do e-mail antes de continuar.', 'yellow');
+        return;
+      }
+
+      if (!conteudo.texto.trim()) {
+        mostrarStatus('Campo Obrigatório', 'Escreva a mensagem do e-mail antes de continuar.', 'yellow');
+        return;
+      }
+
+      if (analiseContatos.contatos.length === 0) {
+        mostrarStatus('Sem Destinatários', 'Insira pelo menos um destinatário com e-mail válido.', 'yellow');
+        return;
+      }
+
+      // Não permitir disparo se houver endereço inválido em CC ou CCO
+      if (procCcCco.temErros) {
+        var listaErros = procCcCco.errosCc.concat(procCcCco.errosCco);
+        mostrarStatus('Endereço Inválido', 'Verifique os e-mails informados em CC/CCO: ' + listaErros.join(', '), 'red');
+        alternarVisibilidadeCcCco(true);
+        validarCamposCcCcoVisual();
+        return;
+      }
+
+      var consumoEstimadoQuota = calcularConsumoEstimadoCota(
+        analiseContatos.contatos,
+        procCcCco.ccValidos,
+        procCcCco.ccoValidos
+      );
+
+      // Bloquear o envio antes de iniciar se a cota restante não for suficiente
+      if (dadosUsuarioApp && typeof dadosUsuarioApp.cotaRestante === 'number' && dadosUsuarioApp.cotaRestante > 0) {
+        if (consumoEstimadoQuota > dadosUsuarioApp.cotaRestante) {
+          mostrarStatus(
+            'Cota Insuficiente',
+            'Cota insuficiente. Este disparo utilizará aproximadamente ' + consumoEstimadoQuota +
+            ' destinatários, mas sua conta possui apenas ' + dadosUsuarioApp.cotaRestante + ' disponíveis.',
+            'yellow'
+          );
+          return;
+        }
+      }
+
+      var remetente = dadosUsuarioApp.email || 'Conta Padrão do Gmail';
+      var selectAlias = document.getElementById('selectAlias');
+      if (selectAlias && selectAlias.value) {
+        remetente = selectAlias.value;
+      }
+
+      lotePendente = {
+        contatos: analiseContatos.contatos,
+        assunto: assunto,
+        html: conteudo.html,
+        texto: conteudo.texto,
+        assinatura: assinatura,
+        remetente: remetente,
+        cc: procCcCco.rawCc.trim(),
+        cco: procCcCco.rawCco.trim(),
+        ccValidos: procCcCco.ccValidos,
+        ccoValidos: procCcCco.ccoValidos,
+        consumoEstimadoQuota: consumoEstimadoQuota
+      };
+
+      document.getElementById('confirmacaoQuantidade').textContent = analiseContatos.contatos.length;
+      document.getElementById('confirmacaoConsumoCota').textContent = consumoEstimadoQuota;
+      document.getElementById('confirmacaoRemetente').textContent = remetente;
+      document.getElementById('confirmacaoAssunto').textContent = assunto;
+
+      // Exibe CC e CCO no modal somente se preenchidos
+      var linhaCc = document.getElementById('confirmacaoLinhaCc');
+      var spanCc = document.getElementById('confirmacaoCc');
+      if (linhaCc && spanCc) {
+        if (procCcCco.ccValidos.length > 0) {
+          spanCc.textContent = procCcCco.ccValidos.join(', ');
+          linhaCc.classList.remove('hidden');
+        } else {
+          linhaCc.classList.add('hidden');
+        }
+      }
+
+      var linhaCco = document.getElementById('confirmacaoLinhaCco');
+      var spanCco = document.getElementById('confirmacaoCco');
+      if (linhaCco && spanCco) {
+        if (procCcCco.ccoValidos.length > 0) {
+          spanCco.textContent = procCcCco.ccoValidos.join(', ');
+          linhaCco.classList.remove('hidden');
+        } else {
+          linhaCco.classList.add('hidden');
+        }
+      }
+
+      // Aviso informativo sobre envios individualizados para CC/CCO
+      var containerAvisoCcCco = document.getElementById('confirmacaoAvisoCcCco');
+      var textoAvisoCcCco = document.getElementById('confirmacaoTextoAvisoCcCco');
+      if (containerAvisoCcCco && textoAvisoCcCco) {
+        var temCc = procCcCco.ccValidos.length > 0;
+        var temCco = procCcCco.ccoValidos.length > 0;
+
+        if (temCc || temCco) {
+          var tipoMencao = (temCc && temCco) ? 'CC/CCO' : (temCc ? 'CC' : 'CCO');
+          var totalDestinatarios = analiseContatos.contatos.length;
+          var pluralEmails = totalDestinatarios === 1 ? 'e-mail' : 'e-mails';
+          textoAvisoCcCco.textContent = 'Os endereços configurados em ' + tipoMencao +
+            ' receberão uma cópia de cada mensagem individual. Neste lote, cada endereço fixo em ' +
+            tipoMencao + ' poderá receber até ' + totalDestinatarios + ' ' + pluralEmails + '.';
+          containerAvisoCcCco.classList.remove('hidden');
+        } else {
+          containerAvisoCcCco.classList.add('hidden');
+        }
+      }
+
+      abrirModal('modalConfirmacao');
+    }
+
+    function executarDisparoConfirmado() {
+      if (!lotePendente) return;
+
+      var aliasSelecionado = '';
+      var nomeRemetente = '';
+      var selectAlias = document.getElementById('selectAlias');
+      if (selectAlias && selectAlias.value) {
+        aliasSelecionado = selectAlias.value;
+        var selectedOpt = selectAlias.options[selectAlias.selectedIndex];
+        if (selectedOpt && selectedOpt.dataset.nome) {
+          nomeRemetente = selectedOpt.dataset.nome;
+        }
+      }
+
+      fecharModal('modalConfirmacao');
+      mostrarStatus('Transmitindo Lote', 'Enviando e-mails sequencialmente com proteção anti-spam. Aguarde...', 'neutral');
+
+      var btnDisparar = document.getElementById('btnDisparar');
+      btnDisparar.disabled = true;
+      btnDisparar.innerHTML = '<svg class="w-4 h-4 animate-spin shrink-0 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="0.95"/></svg> Enviando...';
+      btnDisparar.classList.add('opacity-60', 'cursor-not-allowed');
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(sucessoDisparo)
+          .withFailureHandler(falhaDisparo)
+          .enviarEmailsWeb(
+            lotePendente.contatos,
+            lotePendente.assunto,
+            lotePendente.html,
+            lotePendente.texto,
+            lotePendente.assinatura,
+            aliasSelecionado,
+            nomeRemetente,
+            lotePendente.cc,
+            lotePendente.cco
+          );
+      } else {
+        // Fallback para teste em navegador
+        setTimeout(function() {
+          sucessoDisparo({
+            sucesso: true,
+            quantidade: lotePendente.contatos.length,
+            totalValidos: lotePendente.contatos.length,
+            duplicadosIgnorados: 0,
+            erros: [],
+            cotaRestante: Math.max(0, 1500 - lotePendente.consumoEstimadoQuota),
+            aliasUtilizado: aliasSelecionado || 'demo.user@ipnet.cloud',
+            tempoExecucaoMs: 900,
+            ccUtilizados: lotePendente.ccValidos || [],
+            ccoUtilizados: lotePendente.ccoValidos || [],
+            consumoEstimadoQuota: lotePendente.consumoEstimadoQuota
+          });
+        }, 1000);
+      }
+    }
+
+    function sucessoDisparo(resultado) {
+      var btnDisparar = document.getElementById('btnDisparar');
+      btnDisparar.disabled = false;
+      btnDisparar.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Revisar e Disparar Lote';
+      btnDisparar.classList.remove('opacity-60', 'cursor-not-allowed');
+
+      if (resultado && resultado.cotaRestante !== undefined) {
+        document.getElementById('quotaText').textContent = (typeof resultado.cotaRestante === 'number' ? resultado.cotaRestante.toLocaleString('pt-BR') : resultado.cotaRestante) + ' disponíveis';
+      }
+
+      if (resultado && resultado.sucesso) {
+        exibirRelatorioDisparo(resultado);
+      } else {
+        var erroMsg = (resultado && resultado.erros && resultado.erros.join(', ')) || 'Falha ao processar envio.';
+        mostrarStatus('Falha no Envio', erroMsg, 'red');
+      }
+    }
+
+    function falhaDisparo(erro) {
+      var btnDisparar = document.getElementById('btnDisparar');
+      btnDisparar.disabled = false;
+      btnDisparar.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Revisar e Disparar Lote';
+      btnDisparar.classList.remove('opacity-60', 'cursor-not-allowed');
+
+      mostrarStatus('Erro no Servidor', (erro && erro.message) || String(erro), 'red');
+    }
+
+    function exibirRelatorioDisparo(res) {
+      var status = document.getElementById('status');
+      status.className = 'app-card p-4 space-y-3 border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 text-slate-800 dark:text-slate-200';
+      status.classList.remove('hidden');
+
+      var total = res.totalValidos || res.quantidade;
+      var enviados = res.quantidade || 0;
+      var errosCount = (res.erros && res.erros.length) || 0;
+      var duplicados = res.duplicadosIgnorados || 0;
+      var tempoSeg = res.tempoExecucaoMs ? (res.tempoExecucaoMs / 1000).toFixed(1) : '0.8';
+
+      var html = '<div class="flex items-center justify-between pb-2 border-b border-emerald-200 dark:border-emerald-800/40">' +
+                   '<div class="flex items-center gap-2">' +
+                     '<span class="w-2 h-2 rounded-full bg-emerald-500"></span>' +
+                     '<strong class="text-xs font-semibold text-emerald-900 dark:text-emerald-300">Disparo Concluído com Sucesso</strong>' +
+                   '</div>' +
+                   '<span class="text-[11px] font-mono text-slate-400">' + tempoSeg + 's</span>' +
+                 '</div>';
+
+      html += '<div class="grid grid-cols-3 gap-2 text-center text-xs">' +
+                '<div class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10">' +
+                  '<span class="text-[10px] text-slate-400 block">Enviados</span>' +
+                  '<span class="text-base font-bold text-emerald-600 dark:text-emerald-400">' + enviados + '</span>' +
+                '</div>' +
+                '<div class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10">' +
+                  '<span class="text-[10px] text-slate-400 block">Falhas</span>' +
+                  '<span class="text-base font-bold ' + (errosCount > 0 ? 'text-rose-500' : 'text-slate-400') + '">' + errosCount + '</span>' +
+                '</div>' +
+                '<div class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10">' +
+                  '<span class="text-[10px] text-slate-400 block">Duplicados</span>' +
+                  '<span class="text-base font-bold ' + (duplicados > 0 ? 'text-amber-500' : 'text-slate-400') + '">' + duplicados + '</span>' +
+                '</div>' +
+              '</div>';
+
+      if (errosCount > 0) {
+        html += '<details class="text-[11px] space-y-1">' +
+                  '<summary class="cursor-pointer font-semibold text-rose-600 dark:text-rose-400 hover:underline">Ver ' + errosCount + ' aviso(s)/erro(s)</summary>' +
+                  '<ul class="p-2 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 font-mono text-rose-800 dark:text-rose-300 max-h-24 overflow-y-auto custom-scrollbar">';
+        res.erros.forEach(function(e) {
+          html += '<li>• ' + e + '</li>';
+        });
+        html +=   '</ul>' +
+                '</details>';
+      }
+
+      if (res.consumoEstimadoQuota) {
+        var infoPills = [];
+        if (res.ccUtilizados && res.ccUtilizados.length) {
+          infoPills.push('CC: ' + res.ccUtilizados.length);
+        }
+        if (res.ccoUtilizados && res.ccoUtilizados.length) {
+          infoPills.push('CCO: ' + res.ccoUtilizados.length);
+        }
+        var extraTxt = infoPills.length ? ' (' + infoPills.join(' · ') + ')' : '';
+
+        html += '<div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-emerald-200/60 dark:border-emerald-800/40">' +
+                  '<span>Consumo estimado da cota: <strong class="text-slate-700 dark:text-slate-200 font-semibold">' + res.consumoEstimadoQuota + '</strong> destinatário(s)' + extraTxt + '</span>' +
+                '</div>';
+      }
+
+      status.innerHTML = html;
+    }
+
+    function mostrarStatus(titulo, mensagem, tipo) {
+      var status = document.getElementById('status');
+      status.className = 'rounded-lg p-3 text-xs border transition-all';
+      status.classList.remove('hidden');
+
+      var config = {
+        green: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300',
+        red: 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/40 text-rose-800 dark:text-rose-300',
+        yellow: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-300',
+        neutral: 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300'
+      };
+
+      var classe = config[tipo] || config.neutral;
+      classe.split(' ').forEach(function(c) { status.classList.add(c); });
+
+      status.innerHTML = '<strong>' + titulo + ':</strong> ' + mensagem;
+    }
+
+    function abrirModal(id) {
+      var modal = document.getElementById(id);
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function fecharModal(id) {
+      var modal = document.getElementById(id);
+      if (modal) modal.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-14T16:48:18.444Z",
+  "title": "Design System: Disparador de E-mails IPNET By Vivo",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Indigo Core",
+        "canonical": "#4f46e5",
+        "tonalRamp": [
+          "#eef2ff",
+          "#e0e7ff",
+          "#c7d2fe",
+          "#818cf8",
+          "#6366f1",
+          "#4f46e5",
+          "#4338ca",
+          "#3730a3",
+          "#312e81"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Canvas Slate",
+        "canonical": "#f8fafc",
+        "tonalRamp": [
+          "#ffffff",
+          "#f8fafc",
+          "#f1f5f9",
+          "#e2e8f0",
+          "#cbd5e1",
+          "#94a3b8",
+          "#64748b",
+          "#475569",
+          "#334155",
+          "#1e293b",
+          "#0f172a",
+          "#0b1120",
+          "#090d16"
+        ]
+      },
+      "status-warning": {
+        "role": "accent",
+        "displayName": "Amber Advisory",
+        "canonical": "#f59e0b",
+        "tonalRamp": [
+          "#fffbeb",
+          "#fef3c7",
+          "#fde68a",
+          "#f59e0b",
+          "#d97706",
+          "#92400e"
+        ]
+      },
+      "status-success": {
+        "role": "accent",
+        "displayName": "Emerald Pulse",
+        "canonical": "#10b981",
+        "tonalRamp": [
+          "#ecfdf5",
+          "#d1fae5",
+          "#a7f3d0",
+          "#10b981",
+          "#059669",
+          "#064e3b"
+        ]
+      },
+      "status-error": {
+        "role": "accent",
+        "displayName": "Rose Error",
+        "canonical": "#ef4444",
+        "tonalRamp": [
+          "#fef2f2",
+          "#fee2e2",
+          "#fca5a5",
+          "#ef4444",
+          "#dc2626",
+          "#991b1b"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título do app no header (16px, semibold)"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Títulos das seções de trabalho (14px, semibold)"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Rótulos de campos primários (13px, semibold)"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto do editor, dados de células e prévia (13px, regular)"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Rótulos secundários e botões (12px, medium)"
+      },
+      "microcopy": {
+        "displayName": "Microcopy",
+        "purpose": "Dicas, notas e rodapé (11px, medium)"
+      },
+      "mono": {
+        "displayName": "Mono Technical",
+        "purpose": "Tokens {{Nome}}, contadores e cotas (11px, medium)"
+      }
+    },
+    "shadows": [
+      {
+        "name": "modal-floating",
+        "value": "0 20px 35px -10px rgba(0, 0, 0, 0.5)",
+        "purpose": "Overlays e modais de prévia/confirmação/importação com backdrop blur."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-rapid",
+        "value": "120ms ease-out",
+        "purpose": "Transições instantâneas de hover e foco sem delay perceptível."
+      },
+      {
+        "name": "ease-disclosure",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Abertura suave do disclosure de CC/CCO."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "2xl",
+        "value": "1440px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Botão determinante de ação de disparo e confirmação.",
+      "html": "<button class=\"btn-primary\"><svg class=\"w-4 h-4\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"22\" y1=\"2\" x2=\"11\" y2=\"13\"/><polygon points=\"22 2 15 22 11 13 2 9 22 2\"/></svg> Revisar e Disparar Lote</button>",
+      "css": ".btn-primary { background: #4f46e5; color: #fff; font-weight: 600; border-radius: 8px; padding: 8px 16px; font-size: 13px; border: 1px solid transparent; transition: background-color 120ms ease-out; display: inline-flex; align-items: center; gap: 6px; } .btn-primary:hover { background: #4338ca; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Botões neutros para ações secundárias como Prévia e Adicionar Linha.",
+      "html": "<button class=\"btn-secondary\">Prévia Realista</button>",
+      "css": ".btn-secondary { background: var(--btn-secondary-bg); border: 1px solid var(--btn-secondary-border); color: var(--text-main); font-weight: 500; border-radius: 8px; padding: 7px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }"
+    },
+    {
+      "name": "Variable Pill Token",
+      "kind": "chip",
+      "refersTo": "mono",
+      "description": "Token de inserção rápida de tags dinâmicas.",
+      "html": "<span class=\"var-pill\">+ {{Nome}}</span>",
+      "css": ".var-pill { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 500; border: 1px solid var(--card-border); background: rgba(99, 102, 241, 0.06); color: #4f46e5; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Enterprise Workspace Console",
+    "overview": "O Disparador de E-mails IPNET By Vivo é uma ferramenta operacional interna de alta precisão e densidade calibrada para o Google Workspace. Não é uma landing page, não é um dashboard decorativo e não é um SaaS de marketing. A hierarquia operacional estrita prioriza: Velocidade Operacional > Clareza > Segurança > Estética.",
+    "keyCharacteristics": [
+      "Superfícies predominantemente planas com regra rest-is-flat absoluta no workspace",
+      "Bordas hairline de 1px com eliminação de cartões aninhados (nested cards)",
+      "Zero sombras no espaço de trabalho; sombras reservadas exclusivamente a overlays e modais",
+      "Indigo funcional restrito a <= 5% da superfície para ações determinantes e foco",
+      "Pareamento funcional Inter (leitura) + JetBrains Mono (tags, cotas e contadores)",
+      "Envelope integrado com Remetente (De) antes de Assunto e Corpo",
+      "Área de ação acoplada diretamente à base da tabela de destinatários"
+    ],
+    "rules": [
+      {
+        "name": "The Rest-Is-Flat Rule",
+        "body": "Nenhum card ou botão possui sombras salientes no estado neutro; a elevação por sombra é ativada apenas em overlays de modais flutuantes.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Functional Accent Rule",
+        "body": "O tom primário Índigo é reservado a <= 5% da área visível para garantir gravidade imediata à ação de envio e estado de foco ativo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Explicit Tag Rule",
+        "body": "Qualquer variável dinâmica substituível é renderizada sempre em JetBrains Mono dentro de pílulas delimitadas.",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Fake-Denominator Rule",
+        "body": "Nunca inventar denominadores ou totais de cota; exibir estritamente o saldo real disponível informado pelo backend do Workspace.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Do manter o envelope na sequência lógica: Remetente (De) -> Assunto -> Corpo",
+      "Do acoplar a área de ação diretamente à base da tabela de destinatários",
+      "Do exibir a cota diária exatamente como informada pelo backend Google Workspace (X disponíveis)",
+      "Do usar a cor âmbar exclusivamente para mensagens de aviso prévio e risco operacional de cota/lote",
+      "Do validar e realçar imediatamente e-mails com erro de sintaxe (.invalid-email)"
+    ],
+    "donts": [
+      "Don't criar caixas ou cartões aninhados dentro de outros cartões (nested cards)",
+      "Don't inventar números totais ou porcentagens de cota que o backend não fornece",
+      "Don't espalhar múltiplos botões de preview redundantes com pesos conflitantes",
+      "Don't usar sombras salientes ou gradientes decorativos no espaço de trabalho",
+      "Don't colocar o campo de Remetente dentro do card de Destinatários"
+    ]
+  }
+}

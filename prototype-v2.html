@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disparador IPNET By Vivo — Workspace Console Next (Prototype v2)</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* CSS Variables: Deep Studio Obsidian & Clean Light Palettes */
+    :root {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border: #e2e8f0;
+      --border-subtle: #edf2f7;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --badge-bg: #eef2ff;
+      --badge-text: #4338ca;
+      --token-bg: #f1f5f9;
+      --token-border: #cbd5e1;
+      --row-hover: #f8fafc;
+      --dock-bg: #ffffff;
+    }
+
+    .dark {
+      --canvas: #090b10;
+      --surface: #0f121a;
+      --surface-elevated: #151924;
+      --surface-subtle: #121520;
+      --border: #1f2536;
+      --border-subtle: #181d2a;
+      --text-main: #f1f3f9;
+      --text-muted: #8b95a8;
+      --text-subtle: #566175;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --badge-bg: #1e1b4b;
+      --badge-text: #a5b4fc;
+      --token-bg: #191e2b;
+      --token-border: #2c354a;
+      --row-hover: #131722;
+      --dock-bg: #0c0e15;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom high-density scrollbars */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.45);
+    }
+
+    /* Variable Token Styling */
+    .var-token {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      background: var(--token-bg);
+      border: 1px solid var(--token-border);
+      color: var(--primary);
+      user-select: none;
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .var-token:hover {
+      border-color: var(--primary);
+      background: var(--badge-bg);
+    }
+
+    /* Clean borderless input */
+    .composer-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      width: 100%;
+      color: var(--text-main);
+    }
+    .composer-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    /* Table Inputs */
+    .table-cell-input {
+      background: transparent;
+      border: 1px solid transparent;
+      outline: none;
+      border-radius: 4px;
+      padding: 3px 6px;
+      width: 100%;
+      font-size: 12px;
+      color: var(--text-main);
+      transition: all 0.1s ease;
+    }
+    .table-cell-input:hover {
+      border-color: var(--border);
+    }
+    .table-cell-input:focus {
+      background: var(--surface-elevated);
+      border-color: var(--primary);
+    }
+
+    /* Keyboard shortcut tags */
+    .kbd-shortcut {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden select-none">
+
+  <!-- ================= TOP APPLICATION BAR ================= -->
+  <header class="h-12 px-4 border-b border-[var(--border)] bg-[var(--surface)] flex items-center justify-between shrink-0 z-30">
+    <!-- Brand & Breadcrumb -->
+    <div class="flex items-center gap-3">
+      <!-- IPNET By Vivo Logo Lockup -->
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </div>
+        <div class="flex items-baseline gap-1">
+          <span class="font-bold text-sm tracking-tight text-[var(--text-main)]">IPNET</span>
+          <span class="text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">By Vivo</span>
+        </div>
+      </div>
+
+      <div class="h-3.5 w-px bg-[var(--border)]"></div>
+
+      <!-- Application Title & Status Indicator -->
+      <div class="flex items-center gap-2 text-xs">
+        <span class="font-medium text-[var(--text-main)]">Console de Disparo</span>
+        <span class="text-[var(--text-subtle)]">/</span>
+        <span class="text-[var(--text-muted)] font-mono text-[11px]">Prospecção Q3 — Google Workspace</span>
+        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          Pronto
+        </span>
+      </div>
+    </div>
+
+    <!-- Center: Operational Quota Telemetry (Linear-Style Pill) -->
+    <div class="hidden md:flex items-center gap-3 px-3 py-1 rounded-md bg-[var(--surface-elevated)] border border-[var(--border)] text-xs">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="font-mono text-[11px] text-[var(--text-main)]">phellipe.souza@ipnet.cloud</span>
+      </div>
+      <div class="h-3 w-px bg-[var(--border)]"></div>
+      <div class="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
+        <span>Cota restante:</span>
+        <strong class="font-mono text-[var(--text-main)] font-semibold">1.458 / 1.500</strong>
+        <div class="w-12 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+          <div class="h-full bg-emerald-500 rounded-full" style="width: 97%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Controls: View Toggle & Theme Switcher -->
+    <div class="flex items-center gap-2">
+      <!-- Fast Preview Mode Switcher -->
+      <div class="flex items-center p-0.5 rounded-md bg-[var(--surface-elevated)] border border-[var(--border)] text-xs">
+        <button type="button" onclick="openModal('modalPreviewRealistic')" class="px-2.5 py-1 rounded font-medium transition-all hover:bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Prévia Realista</span>
+          <span class="kbd-shortcut">⌘P</span>
+        </button>
+      </div>
+
+      <div class="h-4 w-px bg-[var(--border)]"></div>
+
+      <!-- Theme Switcher -->
+      <button type="button" onclick="toggleTheme()" class="p-1.5 rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors" title="Alternar tema claro/escuro">
+        <svg id="themeIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+
+      <!-- User Avatar Chip -->
+      <div class="w-6 h-6 rounded-full bg-indigo-600 text-white font-semibold text-[11px] flex items-center justify-center">
+        PS
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ================= CONTINUOUS WORKSPACE (SPLIT PANE 58/42) ================= -->
+  <main class="flex-1 flex overflow-hidden">
+
+    <!-- ----------------- LEFT PANE: COMPOSER & ENVELOPE (58%) ----------------- -->
+    <section class="w-full lg:w-[58%] h-full flex flex-col bg-[var(--surface)] border-r border-[var(--border)] overflow-hidden">
+      
+      <!-- Envelope Section -->
+      <div class="p-4 pb-3 border-b border-[var(--border)] space-y-3 shrink-0 bg-[var(--surface)]">
+        
+        <!-- Row 1: Sender & Superhuman-style CC/CCO Disclosure -->
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 flex-1 min-w-0 mr-4">
+            <span class="text-[var(--text-muted)] font-medium shrink-0">De:</span>
+            <div class="relative flex-1 max-w-md">
+              <select class="composer-input font-medium text-xs cursor-pointer py-0.5 px-1.5 rounded hover:bg-[var(--surface-elevated)] transition-colors text-[var(--text-main)] truncate">
+                <option selected>phellipe.souza@ipnet.cloud (Conta Oficial do Google Workspace)</option>
+                <option>comercial@ipnet.cloud (Alias de Vendas)</option>
+                <option>parcerias.vivo@ipnet.cloud (Alias Institucional)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Discrete CC/CCO Trigger -->
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="toggleCcCcoDrawer()" id="btnCcTrigger" class="px-2 py-0.5 rounded text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-elevated)] transition-colors">
+              + Cc / Cco
+            </button>
+          </div>
+        </div>
+
+        <!-- Collapsible CC/CCO Drawer -->
+        <div id="drawerCcCco" class="hidden space-y-2 pt-2 border-t border-[var(--border-subtle)] text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--text-muted)] font-medium w-7 shrink-0">Cc:</span>
+            <input type="text" class="composer-input px-2 py-1 rounded bg-[var(--surface-elevated)] border border-[var(--border)] text-xs font-mono" value="gestao.contas@ipnet.cloud, supervisao@ipnet.cloud" placeholder="Separar por vírgula...">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--text-muted)] font-medium w-7 shrink-0">Cco:</span>
+            <input type="text" class="composer-input px-2 py-1 rounded bg-[var(--surface-elevated)] border border-[var(--border)] text-xs font-mono" value="auditoria.disparos@ipnet.cloud" placeholder="Separar por vírgula...">
+          </div>
+          <div class="text-[11px] text-[var(--text-subtle)] pl-9 flex items-center justify-between">
+            <span>Estes endereços receberão uma cópia de cada mensagem enviada no lote.</span>
+            <span class="font-mono text-emerald-500">✓ 3 destinatários configurados em cópia</span>
+          </div>
+        </div>
+
+        <!-- Row 2: Subject Input -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 flex-1 mr-3">
+              <span class="text-[var(--text-muted)] font-medium shrink-0">Assunto:</span>
+              <input type="text" id="inputAssunto" class="composer-input font-semibold text-sm text-[var(--text-main)] py-0.5 border-b border-transparent focus:border-[var(--primary)] transition-all" value="Aceleração de Produtividade Google Workspace para a {{Empresa}}" placeholder="Digite o assunto...">
+            </div>
+            <span class="font-mono text-[11px] text-[var(--text-subtle)] shrink-0">65 / 250</span>
+          </div>
+
+          <!-- Variable Pills Inline Bar -->
+          <div class="flex items-center justify-between pt-0.5">
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="text-[11px] text-[var(--text-subtle)] mr-0.5">Injetar no assunto:</span>
+              <button type="button" onclick="insertToken('{{Nome}}')" class="var-token" title="Inserir {{Nome}}">+ {{Nome}}</button>
+              <button type="button" onclick="insertToken('{{Empresa}}')" class="var-token" title="Inserir {{Empresa}}">+ {{Empresa}}</button>
+              <button type="button" onclick="insertToken('{{GN}}')" class="var-token" title="Inserir {{GN}}">+ {{GN}}</button>
+            </div>
+            <span class="text-[10px] text-[var(--text-subtle)] font-mono">Personalização individual</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linear / Resend Style Formatting Bar -->
+      <div class="px-4 py-1.5 border-b border-[var(--border)] bg-[var(--surface-subtle)] flex items-center justify-between shrink-0 text-xs">
+        <div class="flex items-center gap-1">
+          <select class="bg-transparent text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] py-0.5 px-1.5 rounded hover:bg-[var(--surface-elevated)] cursor-pointer outline-none">
+            <option>Texto Normal</option>
+            <option>Título</option>
+            <option>Subtítulo</option>
+          </select>
+
+          <div class="h-3 w-px bg-[var(--border)] mx-1"></div>
+
+          <button type="button" class="p-1 rounded hover:bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)] font-bold text-xs" title="Negrito">B</button>
+          <button type="button" class="p-1 rounded hover:bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)] italic text-xs" title="Itálico">I</button>
+          <button type="button" class="p-1 rounded hover:bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)] underline text-xs" title="Sublinhado">U</button>
+
+          <div class="h-3 w-px bg-[var(--border)] mx-1"></div>
+
+          <button type="button" class="p-1 rounded hover:bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)]" title="Marcadores">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+          <button type="button" class="p-1 rounded hover:bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)]" title="Link">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </button>
+
+          <div class="h-3 w-px bg-[var(--border)] mx-1"></div>
+
+          <!-- Variable Tokens in Editor -->
+          <div class="flex items-center gap-1">
+            <span class="text-[11px] text-[var(--text-subtle)] mr-0.5">Tags no corpo:</span>
+            <button type="button" onclick="insertTokenEditor('{{Nome}}')" class="var-token text-[10px] py-0.5 px-1.5">+ {{Nome}}</button>
+            <button type="button" onclick="insertTokenEditor('{{Empresa}}')" class="var-token text-[10px] py-0.5 px-1.5">+ {{Empresa}}</button>
+            <button type="button" onclick="insertTokenEditor('{{GN}}')" class="var-token text-[10px] py-0.5 px-1.5">+ {{GN}}</button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-[11px] text-[var(--text-subtle)] font-mono">
+          <span>84 palavras</span>
+          <span>•</span>
+          <span class="text-emerald-500">Salvo localmente</span>
+        </div>
+      </div>
+
+      <!-- Document Writing Canvas (Clean, Document-First) -->
+      <div class="flex-1 p-6 overflow-y-auto custom-scrollbar bg-[var(--surface)] text-[var(--text-main)] leading-relaxed text-sm">
+        <div id="editorArea" contenteditable="true" class="min-h-full outline-none space-y-4 max-w-2xl font-normal">
+          <p>Olá, <span class="var-token" contenteditable="false">{{Nome}}</span>!</p>
+
+          <p>Espero que este contato o encontre em um excelente momento de negócios.</p>
+
+          <p>Acompanhamos de perto os avanços operacionais e a liderança da <span class="var-token" contenteditable="false">{{Empresa}}</span> no mercado. Identificamos oportunidades estratégicas para elevar a produtividade das equipes, modernizar o ambiente de colaboração e garantir padrões rigorosos de segurança corporativa através das soluções avançadas do <strong>Google Workspace</strong>.</p>
+
+          <p>Com a coordenação do seu Gerente de Negócios dedicado, <span class="var-token" contenteditable="false">{{GN}}</span>, preparamos um plano de transição seguro, com condições comerciais exclusivas e o acompanhamento técnico da <strong>IPNET By Vivo</strong>.</p>
+
+          <p>Teriam disponibilidade para um breve alinhamento executivo de 15 minutos nesta próxima quinta-feira?</p>
+
+          <p>Atenciosamente,</p>
+        </div>
+      </div>
+
+      <!-- Integrated Gmail Official Signature Strip -->
+      <div class="px-4 py-2 border-t border-[var(--border)] bg-[var(--surface-subtle)] flex items-center justify-between text-xs shrink-0">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+          <span class="text-[11px] font-medium text-[var(--text-muted)] truncate">
+            Assinatura Oficial do Gmail sincronizada para <strong class="text-[var(--text-main)] font-semibold">phellipe.souza@ipnet.cloud</strong>
+          </span>
+        </div>
+        <button type="button" class="text-[11px] font-medium text-[var(--primary)] hover:underline flex items-center gap-1 shrink-0 ml-3">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Sincronizar
+        </button>
+      </div>
+    </section>
+
+
+    <!-- ----------------- RIGHT PANE: DATA GRID & RECIPIENTS (42%) ----------------- -->
+    <section class="w-full lg:w-[42%] h-full flex flex-col bg-[var(--canvas)] overflow-hidden">
+      
+      <!-- Table Header & Quick Action Bar -->
+      <div class="p-3.5 border-b border-[var(--border)] bg-[var(--surface)] space-y-2.5 shrink-0">
+        <div class="flex items-center justify-between">
+          <div class="flex items-baseline gap-2">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Destinatários do Lote</h2>
+            <span class="font-mono text-xs text-[var(--text-main)] font-bold">7 contatos válidos</span>
+          </div>
+
+          <!-- Table Actions -->
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="openModal('modalImport')" class="px-2.5 py-1 rounded bg-[var(--surface-elevated)] hover:bg-[var(--border)] border border-[var(--border)] text-xs font-medium text-[var(--text-main)] transition-colors flex items-center gap-1.5" title="Importar ou colar planilha">
+              <svg class="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Colar Planilha</span>
+              <span class="kbd-shortcut">⌘V</span>
+            </button>
+
+            <button type="button" onclick="addTableRow()" class="px-2.5 py-1 rounded bg-[var(--surface-elevated)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text-main)] text-xs font-medium transition-colors flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ Linha</span>
+            </button>
+
+            <button type="button" class="p-1 rounded hover:bg-rose-500/10 hover:text-rose-500 text-[var(--text-muted)] transition-colors" title="Limpar todas as linhas">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter and Table Options -->
+        <div class="flex items-center justify-between gap-3 text-xs">
+          <!-- Search input -->
+          <div class="relative flex-1">
+            <svg class="w-3.5 h-3.5 text-[var(--text-subtle)] absolute left-2.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar destinatário..." class="w-full pl-8 pr-2 py-1 rounded bg-[var(--surface-elevated)] border border-[var(--border)] text-xs text-[var(--text-main)] placeholder-[var(--text-subtle)] outline-none focus:border-[var(--primary)] transition-colors">
+          </div>
+
+          <!-- GN Toggle Switch -->
+          <label class="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-[var(--text-muted)] hover:text-[var(--text-main)] shrink-0">
+            <input type="checkbox" id="chkGN" checked onchange="toggleGnColumn()" class="w-3.5 h-3.5 rounded text-indigo-600 border-[var(--border)] focus:ring-0 cursor-pointer">
+            <span>Coluna GN ({{GN}})</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Linear-Style High Density Data Table -->
+      <div class="flex-1 overflow-auto custom-scrollbar bg-[var(--surface)]">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-[var(--surface-subtle)] text-[var(--text-muted)] text-[11px] font-semibold border-b border-[var(--border)] sticky top-0 z-10">
+              <th class="py-2 px-2.5 w-8 text-center font-mono">#</th>
+              <th class="py-2 px-2 w-[28%] font-medium">Nome</th>
+              <th class="py-2 px-2 w-[34%] font-medium text-[var(--text-main)]">E-mail</th>
+              <th class="py-2 px-2 w-[24%] font-medium">Empresa</th>
+              <th class="py-2 px-2 w-[22%] font-medium col-gn-cell">GN</th>
+              <th class="py-2 px-1.5 w-7 text-center"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-[var(--border-subtle)] font-normal">
+            
+            <!-- Row 1 -->
+            <tr class="hover:bg-[var(--row-hover)] transition-colors group">
+              <td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">1</td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" value="Camila Duarte"></td>
+              <td class="py-1 px-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="E-mail válido"></span>
+                  <input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" value="camila.duarte@ambev.com.br">
+                </div>
+              </td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input" value="Ambev Brasil"></td>
+              <td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" value="Rafael Costa"></td>
+              <td class="py-1 px-1.5 text-center">
+                <button type="button" class="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr class="hover:bg-[var(--row-hover)] transition-colors group">
+              <td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">2</td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" value="Rodrigo Mendes"></td>
+              <td class="py-1 px-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="E-mail válido"></span>
+                  <input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" value="rodrigo.mendes@itau.com.br">
+                </div>
+              </td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input" value="Itaú Unibanco"></td>
+              <td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" value="Juliana Dias"></td>
+              <td class="py-1 px-1.5 text-center">
+                <button type="button" class="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button>
+              </td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr class="hover:bg-[var(--row-hover)] transition-colors group">
+              <td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">3</td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" value="Fernanda Lima"></td>
+              <td class="py-1 px-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="E-mail válido"></span>
+                  <input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" value="flima@magalu.com">
+                </div>
+              </td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input" value="Magazine Luiza"></td>
+              <td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" value="Rafael Costa"></td>
+              <td class="py-1 px-1.5 text-center">
+                <button type="button" class="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button>
+              </td>
+            </tr>
+
+            <!-- Row 4 -->
+            <tr class="hover:bg-[var(--row-hover)] transition-colors group">
+              <td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">4</td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" value="Gabriel Toledo"></td>
+              <td class="py-1 px-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="E-mail válido"></span>
+                  <input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" value="gabriel@natura.net">
+                </div>
+              </td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input" value="Natura Cosméticos"></td>
+              <td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" value="Marcio Souza"></td>
+              <td class="py-1 px-1.5 text-center">
+                <button type="button" class="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button>
+              </td>
+            </tr>
+
+            <!-- Row 5 -->
+            <tr class="hover:bg-[var(--row-hover)] transition-colors group">
+              <td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">5</td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" value="Beatriz Rocha"></td>
+              <td class="py-1 px-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="E-mail válido"></span>
+                  <input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" value="beatriz.rocha@nubank.com.br">
+                </div>
+              </td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input" value="Nubank"></td>
+              <td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" value="Juliana Dias"></td>
+              <td class="py-1 px-1.5 text-center">
+                <button type="button" class="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button>
+              </td>
+            </tr>
+
+            <!-- Row 6 -->
+            <tr class="hover:bg-[var(--row-hover)] transition-colors group">
+              <td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">6</td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" value="Lucas Alcantara"></td>
+              <td class="py-1 px-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="E-mail válido"></span>
+                  <input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" value="lalcantara@totvs.com.br">
+                </div>
+              </td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input" value="TOTVS Tech"></td>
+              <td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" value="Marcio Souza"></td>
+              <td class="py-1 px-1.5 text-center">
+                <button type="button" class="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button>
+              </td>
+            </tr>
+
+            <!-- Row 7 -->
+            <tr class="hover:bg-[var(--row-hover)] transition-colors group">
+              <td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">7</td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" value="Mariana Vasconcelos"></td>
+              <td class="py-1 px-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="E-mail válido"></span>
+                  <input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" value="mariana@boticario.com.br">
+                </div>
+              </td>
+              <td class="py-1 px-1.5"><input type="text" class="table-cell-input" value="Grupo Boticário"></td>
+              <td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" value="Rafael Costa"></td>
+              <td class="py-1 px-1.5 text-center">
+                <button type="button" class="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer Information Strip -->
+      <div class="px-4 py-2 border-t border-[var(--border)] bg-[var(--surface)] flex items-center justify-between text-[11px] text-[var(--text-muted)] shrink-0">
+        <div class="flex items-center gap-2">
+          <span>7 contatos prontos</span>
+          <span>•</span>
+          <span class="text-emerald-500 font-medium">100% validados</span>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-[10px]">
+          <span>Máximo operacional: 50/lote</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ================= DOMINANT ACTION DOCK (BOTTOM COMMAND BAR) ================= -->
+  <footer class="h-14 px-5 border-t border-[var(--border)] bg-[var(--dock-bg)] flex items-center justify-between shrink-0 z-30 shadow-lg">
+    <!-- Left: Real-time Dispatch Telemetry -->
+    <div class="flex items-center gap-3 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span>
+        <span class="font-medium text-[var(--text-main)]">Pronto para Disparo:</span>
+      </div>
+      <div class="flex items-center gap-2 font-mono text-[11px] text-[var(--text-muted)]">
+        <span class="text-[var(--text-main)] font-semibold">7 contatos principais</span>
+        <span>•</span>
+        <span>2 em cópia CC</span>
+        <span>•</span>
+        <span>Consumo previsto: <strong class="text-indigo-600 dark:text-indigo-400 font-semibold">21 envios</strong></span>
+        <span>•</span>
+        <span>Cota restante pós-disparo: <strong class="text-emerald-500 font-semibold">1.437</strong></span>
+      </div>
+    </div>
+
+    <!-- Right: High-Conviction Command Actions -->
+    <div class="flex items-center gap-2.5">
+      <!-- Secondary: Realistic Preview -->
+      <button type="button" onclick="openModal('modalPreviewRealistic')" class="px-3.5 py-1.5 rounded-md bg-[var(--surface-elevated)] hover:bg-[var(--border)] text-[var(--text-main)] border border-[var(--border)] text-xs font-semibold transition-all flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-[var(--text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Prévia Realista</span>
+        <span class="kbd-shortcut">⌘P</span>
+      </button>
+
+      <!-- Primary: Prominent Commanding Dispatch Button -->
+      <button type="button" onclick="openModal('modalReview')" class="px-4 py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-xs font-semibold transition-all flex items-center gap-2 shadow-sm shadow-indigo-600/30">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span>Revisar e Disparar Lote</span>
+        <span class="bg-white/20 text-white font-mono px-1 py-0.5 rounded text-[10px] font-semibold">⌘↵</span>
+      </button>
+    </div>
+  </footer>
+
+
+  <!-- ================= MODALS & DRAWERS (INTERACTIVE EXPLORATION) ================= -->
+
+  <!-- Modal 1: Realistic Client Preview Modal -->
+  <div id="modalPreviewRealistic" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <!-- Header -->
+      <div class="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between bg-[var(--surface-subtle)]">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <h3 class="text-xs font-semibold text-[var(--text-main)]">Pré-visualização do Cliente (Simulação 1º Contato)</h3>
+        </div>
+        <button type="button" onclick="closeModal('modalPreviewRealistic')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm font-bold">✕</button>
+      </div>
+
+      <!-- Client Email Envelope -->
+      <div class="p-5 border-b border-[var(--border)] bg-[var(--surface)] space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-base font-semibold text-[var(--text-main)]">Aceleração de Produtividade Google Workspace para a Ambev Brasil</span>
+          <span class="text-[11px] text-[var(--text-subtle)] font-mono">16:45 (agora)</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <span class="font-medium text-[var(--text-main)]">Phellipe Souza</span>
+          <span class="text-[var(--text-subtle)]">&lt;phellipe.souza@ipnet.cloud&gt;</span>
+        </div>
+        <div class="text-[11px] text-[var(--text-subtle)] space-y-0.5 font-mono">
+          <div>Para: Camila Duarte &lt;camila.duarte@ambev.com.br&gt;</div>
+          <div>Cc: gestao.contas@ipnet.cloud, supervisao@ipnet.cloud</div>
+        </div>
+      </div>
+
+      <!-- Rendered Email Body -->
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white text-slate-900 text-sm leading-relaxed space-y-4">
+        <p>Olá, <strong>Camila Duarte</strong>!</p>
+        <p>Espero que este contato o encontre em um excelente momento de negócios.</p>
+        <p>Acompanhamos de perto os avanços operacionais e a liderança da <strong>Ambev Brasil</strong> no mercado. Identificamos oportunidades estratégicas para elevar a produtividade das equipes, modernizar o ambiente de colaboração e garantir padrões rigorosos de segurança corporativa através das soluções avançadas do <strong>Google Workspace</strong>.</p>
+        <p>Com a coordenação do seu Gerente de Negócios dedicado, <strong>Rafael Costa</strong>, preparamos um plano de transição seguro, com condições comerciais exclusivas e o acompanhamento técnico da <strong>IPNET By Vivo</strong>.</p>
+        <p>Teriam disponibilidade para um breve alinhamento executivo de 15 minutos nesta próxima quinta-feira?</p>
+        <p>Atenciosamente,</p>
+
+        <!-- Official Signature Render -->
+        <div class="pt-4 border-t border-slate-200 mt-6 text-xs text-slate-600">
+          <div class="font-bold text-slate-800 text-sm">Phellipe Souza</div>
+          <div>Enterprise Cloud Consultant • IPNET By Vivo</div>
+          <div class="text-indigo-600 font-mono text-[11px]">phellipe.souza@ipnet.cloud • +55 (11) 98765-4321</div>
+          <div class="text-[10px] text-slate-400 mt-1">IPNET Advanced Cloud Solutions — Google Premier Partner</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-5 py-2.5 border-t border-[var(--border)] bg-[var(--surface-subtle)] flex items-center justify-between text-xs">
+        <span class="text-[var(--text-subtle)]">Tags {{Nome}}, {{Empresa}} e {{GN}} substituídas com fidelidade.</span>
+        <button type="button" onclick="closeModal('modalPreviewRealistic')" class="px-3.5 py-1.5 rounded bg-[var(--surface-elevated)] border border-[var(--border)] text-[var(--text-main)] font-medium">Fechar Prévia</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 2: Review & Confirm Dispatch Modal -->
+  <div id="modalReview" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-[var(--border)] bg-[var(--surface-subtle)] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-5 h-5 rounded bg-indigo-600/20 text-indigo-500 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </div>
+          <h3 class="text-sm font-semibold text-[var(--text-main)]">Revisão Pré-Disparo do Lote</h3>
+        </div>
+        <button type="button" onclick="closeModal('modalReview')" class="text-[var(--text-muted)] hover:text-[var(--text-main)]">✕</button>
+      </div>
+
+      <div class="p-5 space-y-3.5 text-xs">
+        <!-- Telemetry Breakdown Cards -->
+        <div class="grid grid-cols-2 gap-3 font-mono">
+          <div class="p-3 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] space-y-1">
+            <span class="text-[10px] text-[var(--text-subtle)] uppercase">Destinatários Únicos</span>
+            <div class="text-lg font-bold text-[var(--text-main)]">7 contatos</div>
+            <span class="text-[10px] text-emerald-500">Sem duplicados</span>
+          </div>
+
+          <div class="p-3 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] space-y-1">
+            <span class="text-[10px] text-[var(--text-subtle)] uppercase">Consumo de Cota</span>
+            <div class="text-lg font-bold text-indigo-500">21 envios</div>
+            <span class="text-[10px] text-[var(--text-subtle)]">7 x (1 + 2 cópias)</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-[var(--text-muted)]">Remetente:</span>
+            <span class="font-mono text-[var(--text-main)] font-medium">phellipe.souza@ipnet.cloud</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[var(--text-muted)]">Assunto formatado:</span>
+            <span class="font-medium text-[var(--text-main)] truncate max-w-[280px]">Aceleração de Produtividade Google Workspace...</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[var(--text-muted)]">Cópia (CC):</span>
+            <span class="font-mono text-[var(--text-main)]">2 endereços ativos</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[var(--text-muted)]">Cópia oculta (CCO):</span>
+            <span class="font-mono text-[var(--text-main)]">1 endereço ativo</span>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+            <span class="text-[var(--text-muted)]">Cota diária disponível:</span>
+            <span class="font-mono text-emerald-500 font-bold">1.458 disponíveis (Suficiente)</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Cada contato receberá uma mensagem individualizada pelo Gmail oficial.</span>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 border-t border-[var(--border)] bg-[var(--surface-subtle)] flex items-center justify-between">
+        <button type="button" onclick="closeModal('modalReview')" class="px-3.5 py-1.5 rounded text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)]">Cancelar</button>
+        <button type="button" onclick="simularEnvio()" id="btnConfirmarDisparo" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-600/25 flex items-center gap-1.5">
+          <span>Confirmar e Iniciar Disparo</span>
+          <span class="kbd-shortcut bg-white/20 text-white border-transparent">Enter</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 3: Import from Spreadsheet Modal -->
+  <div id="modalImport" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-xl rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-[var(--border)] bg-[var(--surface-subtle)] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <h3 class="text-xs font-semibold text-[var(--text-main)]">Colar Dados do Google Sheets ou Excel</h3>
+        </div>
+        <button type="button" onclick="closeModal('modalImport')" class="text-[var(--text-muted)] hover:text-[var(--text-main)]">✕</button>
+      </div>
+
+      <div class="p-5 space-y-3 text-xs">
+        <p class="text-[var(--text-muted)]">
+          Selecione as colunas na sua planilha e pressione <strong class="text-[var(--text-main)] font-semibold">Ctrl+C</strong>. Em seguida, cole diretamente na área abaixo.
+        </p>
+
+        <div class="p-2.5 rounded bg-[var(--surface-elevated)] border border-[var(--border)] font-mono text-[11px] text-[var(--text-subtle)]">
+          Ordem esperada das colunas: <strong>Nome | E-mail | Empresa | GN</strong> (ou <strong>Nome | E-mail | Empresa</strong>)
+        </div>
+
+        <textarea rows="6" class="w-full p-3 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] text-xs font-mono text-[var(--text-main)] placeholder-[var(--text-subtle)] outline-none focus:border-[var(--primary)]" placeholder="Camila Duarte	camila@empresa.com	Ambev	Rafael Costa&#10;Rodrigo Mendes	rodrigo@empresa.com	Itaú	Juliana Dias..."></textarea>
+      </div>
+
+      <div class="px-5 py-3 border-t border-[var(--border)] bg-[var(--surface-subtle)] flex items-center justify-between">
+        <span class="text-[11px] text-[var(--text-subtle)]">Separador por tabulação detectado automaticamente.</span>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeModal('modalImport')" class="px-3.5 py-1.5 rounded text-xs font-medium text-[var(--text-muted)]">Cancelar</button>
+          <button type="button" onclick="closeModal('modalImport')" class="px-4 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs">Carregar Linhas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= JAVASCRIPT FOR PROTOTYPE ================= -->
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      const icon = document.getElementById('themeIcon');
+      if (isDark) {
+        icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      } else {
+        icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+      }
+    }
+
+    // Toggle CC/CCO Drawer
+    function toggleCcCcoDrawer() {
+      const drawer = document.getElementById('drawerCcCco');
+      const btn = document.getElementById('btnCcTrigger');
+      const isHidden = drawer.classList.toggle('hidden');
+      btn.textContent = isHidden ? '+ Cc / Cco' : '- Ocultar Cc / Cco';
+      btn.classList.toggle('text-[var(--primary)]', !isHidden);
+    }
+
+    // Toggle GN Column
+    function toggleGnColumn() {
+      const chk = document.getElementById('chkGN');
+      const cells = document.querySelectorAll('.col-gn-cell');
+      cells.forEach(c => c.classList.toggle('hidden', !chk.checked));
+    }
+
+    // Insert Token into Subject
+    function insertToken(token) {
+      const input = document.getElementById('inputAssunto');
+      input.value += ' ' + token;
+      input.focus();
+    }
+
+    // Insert Token into Editor
+    function insertTokenEditor(token) {
+      const editor = document.getElementById('editorArea');
+      document.execCommand('insertHTML', false, ' <span class="var-token" contenteditable="false">' + token + '</span> ');
+      editor.focus();
+    }
+
+    // Modal helpers
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    // Add empty row simulation
+    function addTableRow() {
+      const tbody = document.getElementById('tableBody');
+      const rowCount = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-[var(--row-hover)] transition-colors group';
+      tr.innerHTML = '<td class="py-1 px-2.5 text-center font-mono text-[11px] text-[var(--text-subtle)]">' + rowCount + '</td>' +
+        '<td class="py-1 px-1.5"><input type="text" class="table-cell-input font-medium" placeholder="Nome"></td>' +
+        '<td class="py-1 px-1.5"><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span><input type="email" class="table-cell-input font-mono text-xs text-indigo-600 dark:text-indigo-400" placeholder="email@empresa.com"></div></td>' +
+        '<td class="py-1 px-1.5"><input type="text" class="table-cell-input" placeholder="Empresa"></td>' +
+        '<td class="py-1 px-1.5 col-gn-cell"><input type="text" class="table-cell-input" placeholder="Gerente de Negócios"></td>' +
+        '<td class="py-1 px-1.5 text-center"><button type="button" class="btn-remove-row opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-rose-500 transition-opacity p-0.5" title="Remover">✕</button></td>';
+      tbody.appendChild(tr);
+    }
+
+    // Event delegation for row removal
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('btn-remove-row') || (e.target.tagName === 'BUTTON' && e.target.textContent === '✕')) {
+        const tr = e.target.closest('tr');
+        if (tr && tr.parentElement && tr.parentElement.id === 'tableBody') {
+          tr.remove();
+        }
+      }
+    });
+
+    // Simulation of Sending
+    function simularEnvio() {
+      const btn = document.getElementById('btnConfirmarDisparo');
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="w-4 h-4 animate-spin shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="0.95"/></svg> <span>Disparando 7 mensagens no Gmail...</span>';
+      setTimeout(() => {
+        btn.innerHTML = '✓ Disparo Concluído com Sucesso!';
+        btn.className = 'px-5 py-2 rounded-lg bg-emerald-600 text-white font-semibold text-xs flex items-center gap-1.5';
+        setTimeout(() => {
+          closeModal('modalReview');
+          btn.disabled = false;
+          btn.innerHTML = '<span>Confirmar e Iniciar Disparo</span> <span class="kbd-shortcut bg-white/20 text-white border-transparent">Enter</span>';
+          btn.className = 'px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-600/25 flex items-center gap-1.5';
+        }, 1500);
+      }, 1800);
+    }
+
+    // Keyboard Shortcuts (Linear / Raycast style)
+    document.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        openModal('modalPreviewRealistic');
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        openModal('modalReview');
+      }
+      if (e.key === 'Escape') {
+        closeModal('modalPreviewRealistic');
+        closeModal('modalReview');
+        closeModal('modalImport');
+      }
+    });
+  </script>
+</body>
+</html>
